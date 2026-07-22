@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
+using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -90,27 +91,21 @@ namespace welfareSystem.Mortality_Module
         {
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = @"SELECT 
-                                    a.MRNo,
-                                    a.AdmNo,
-                                    b.PatientTitle + ' ' + b.PatientName + ' ' + b.FatherTitle + ' ' + b.FatherName AS PatientFullName,
-                                    DATEDIFF(YEAR, b.DoB, GETDATE()) AS Age,
-                                    b.Gender,
-                                    b.CNIC,
-                                    b.CellNo,
-                                    ISNULL(d.CityName, '') AS CityName,
-                                    a.TotalBillAmount,
-                                    c.ConsultantName,
-                                    a.Diagnosis
-                                FROM IPD_Admission a
-                                INNER JOIN EMR_Patients b ON a.MRNo = b.MRNo
-                                LEFT JOIN Gen_Consultants c ON a.ConsultantCode = c.ConsultantCode
-                                LEFT JOIN Global_Cities d ON b.City = d.CityCode
-                                WHERE a.BillNo IS NULL 
-                                AND (a.MRNo LIKE @search OR b.PatientName LIKE @search OR a.AdmNo LIKE @search OR b.CNIC LIKE @search)";
+                string query = @"SELECT TOP 10
+            a.AdmNo + ' - ' + a.MRNo + ' - ' + c.PatientName AS Patient
+        FROM IPD_Admission a
+        INNER JOIN EMR_Patients c ON a.MRNo = c.MRNo
+        WHERE a.BillNo IS NULL
+        AND (
+            a.AdmNo LIKE @p 
+            OR a.MRNo LIKE @p
+            OR c.PatientName LIKE @p
+        )
+        ORDER BY c.PatientName";
 
                 SqlCommand cmd = new SqlCommand(query, con);
-                cmd.Parameters.AddWithValue("@search", "%" + searchTerm + "%");
+                cmd.Parameters.AddWithValue("@p", "%" + searchTerm + "%");
+                con.Open();
                 SqlDataReader dr = cmd.ExecuteReader();
 
                 if (dr.Read())
@@ -248,8 +243,7 @@ namespace welfareSystem.Mortality_Module
             if (e.CommandName == "ViewCert" || e.CommandName == "PrintCert")
             {
                 string certID = e.CommandArgument.ToString();
-                LoadCertificateForPrint(certID);
-                ScriptManager.RegisterStartupScript(this, GetType(), "showModal", "showCertificateModal();", true);
+                Response.Redirect("PrintCertificate.aspx?CertificateID=" + certID);
             }
             else if (e.CommandName == "DeleteCert")
             {
@@ -275,6 +269,7 @@ namespace welfareSystem.Mortality_Module
 
         private void LoadCertificateForPrint(string certID)
         {
+            hdnCertificateID.Value = certID;
             using (SqlConnection con = new SqlConnection(mortalityConnection))
             {
                 string query = "SELECT * FROM DeathCertificateStore WHERE CertificateID = @ID";
@@ -396,6 +391,116 @@ namespace welfareSystem.Mortality_Module
             {
                 e.Row.Attributes["onmouseover"] = "this.style.backgroundColor='#f0f8ff';";
                 e.Row.Attributes["onmouseout"] = "this.style.backgroundColor='';";
+            }
+        }
+
+        // WEB METHOD FOR AUTOCOMPLETE
+        [System.Web.Services.WebMethod]
+        public static List<string> GetPatients(string prefix)
+        {
+            List<string> patients = new List<string>();
+            string cs = ConfigurationManager.ConnectionStrings["HospitalDBConnection"].ConnectionString;
+
+            using (SqlConnection con = new SqlConnection(cs))
+            {
+                string query = @"
+            SELECT TOP 10
+            a.AdmNo + ' - ' + a.MRNo + ' - ' + c.PatientName AS Patient
+        FROM IPD_Admission a
+        INNER JOIN EMR_Patients c ON a.MRNo = c.MRNo
+        WHERE a.BillNo IS NULL
+        AND (
+            a.AdmNo LIKE @p 
+            OR a.MRNo LIKE @p
+            OR c.PatientName LIKE @p
+        )
+        ORDER BY c.PatientName";
+
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@p", "%" + prefix + "%");
+                con.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    patients.Add(dr["Patient"].ToString());
+                }
+            }
+
+            return patients;
+        }
+
+        // LOAD PATIENT DATA WHEN SELECTED FROM AUTOCOMPLETE
+        protected void btnLoadPatient_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string mrNo = hfMRNo.Value.Trim();
+                System.Diagnostics.Debug.WriteLine("btnLoadPatient_Click called. MRNo: " + mrNo);
+
+                if (string.IsNullOrEmpty(mrNo))
+                {
+                    pnlPatientDetails.Visible = false;
+                    pnlCertificateForm.Visible = false;
+                    ScriptManager.RegisterStartupScript(this, GetType(), "alert", "Swal.fire('Warning','Please select a valid patient','warning');", true);
+                    return;
+                }
+
+                string query = @"
+                    SELECT 
+                        a.MRNo,
+                        a.AdmNo,
+                        c.PatientTitle + ' ' + c.PatientName + ' ' + ISNULL(c.FatherTitle, '') + ' ' + ISNULL(c.FatherName, '') AS PatientFullName,
+                        DATEDIFF(YEAR, c.DoB, GETDATE()) AS Age,
+                        c.Gender, 
+                        c.CellNo, 
+                        c.CNIC, 
+                        e.ConsultantName,
+                        '' AS Diagnosis
+                    FROM IPD_Admission a
+                    INNER JOIN EMR_Patients c ON a.MRNo = c.MRNo
+                    LEFT JOIN Gen_Consultants e ON a.ConsultantCode = e.ConsultantCode
+                    WHERE a.MRNo = @MRNo
+                    AND a.BillNo IS NULL";
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@MRNo", mrNo);
+                    con.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    if (dr.Read())
+                    {
+                        lblMRNo.Text = dr["MRNo"].ToString();
+                        lblAdmNo.Text = dr["AdmNo"].ToString();
+                        lblPatientName.Text = dr["PatientFullName"].ToString();
+                        lblAgeGender.Text = dr["Age"].ToString() + " yrs / " + dr["Gender"].ToString();
+                        lblCNIC.Text = dr["CNIC"].ToString();
+                        lblContact.Text = dr["CellNo"].ToString();
+                        lblConsultant.Text = dr["ConsultantName"] != DBNull.Value ? dr["ConsultantName"].ToString() : "N/A";
+                        lblDiagnosis.Text = dr["Diagnosis"] != DBNull.Value ? dr["Diagnosis"].ToString() : "N/A";
+
+                        pnlPatientDetails.Visible = true;
+                        pnlCertificateForm.Visible = true;
+
+                        // Set default values
+                        txtFinalDiagnosis.Text = dr["Diagnosis"] != DBNull.Value ? dr["Diagnosis"].ToString() : "";
+                        hdnCertificateID.Value = "";
+                    }
+                    else
+                    {
+                        pnlPatientDetails.Visible = false;
+                        pnlCertificateForm.Visible = false;
+                        ScriptManager.RegisterStartupScript(this, GetType(), "alert", "Swal.fire('Not Found','Patient not found or bill has been generated','warning');", true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                pnlPatientDetails.Visible = false;
+                pnlCertificateForm.Visible = false;
+                ScriptManager.RegisterStartupScript(this, GetType(), "alert", "Swal.fire('Error','" + ex.Message.Replace("'", "\\'") + "','error');", true);
             }
         }
     }

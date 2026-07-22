@@ -96,6 +96,7 @@
     <Content Include="Mortality_Module\DeathCertificate.aspx" />
     <Content Include="Mortality_Module\DeathCertificateEdit.aspx" />
     <Content Include="Mortality_Module\DeathCertificateList.aspx" />
+    <Content Include="Mortality_Module\PrintCertificate.aspx" />
     <Content Include="PatientInfo.aspx" />
     <Content Include="PatientRegistration.aspx" />
     <Content Include="Patient_sent_from_billing.aspx" />
@@ -295,6 +296,13 @@
     </Compile>
     <Compile Include="Mortality_Module\DeathCertificateList.aspx.designer.cs">
       <DependentUpon>DeathCertificateList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Mortality_Module\PrintCertificate.aspx.cs">
+      <DependentUpon>PrintCertificate.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Mortality_Module\PrintCertificate.aspx.designer.cs">
+      <DependentUpon>PrintCertificate.aspx</DependentUpon>
     </Compile>
     <Compile Include="PatientInfo.aspx.cs">
       <DependentUpon>PatientInfo.aspx</DependentUpon>

@@ -130,7 +130,7 @@ Inherits="welfareSystem.Death_Certificate" %>
             minLength: 2,
             select: function (event, ui) {
                 var selectedValue = ui.item.value;
-                var parts = selectedValue.split(' | '); // Pipe separator use kiya
+                var parts = selectedValue.split(' - '); // Hyphen separator to match web method format
 
                 if (parts.length >= 3) {
                     var admNo = parts[0].trim();
@@ -138,9 +138,9 @@ Inherits="welfareSystem.Death_Certificate" %>
                     var patientName = parts[2].trim();
 
                     $("#<%= hfMRNo.ClientID %>").val(mrNo);
-        $("#<%= hfAdmNo.ClientID %>").val(admNo);
-        $("#txtSearch").val(selectedValue);
-        
+                    $("#<%= hfAdmNo.ClientID %>").val(admNo);
+                    $("#txtSearch").val(selectedValue);
+
                     $("#<%= btnLoadPatient.ClientID %>").click();
                 }
 

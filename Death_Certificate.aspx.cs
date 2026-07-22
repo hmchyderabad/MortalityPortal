@@ -32,17 +32,17 @@ namespace welfareSystem
             using (SqlConnection con = new SqlConnection(cs))
             {
                 string query = @"
-            select top 1
-	  b.AdmNo+ ' - ' + b.MRNo + ' - ' + a.PatientName AS Patient
-	  from EMR_Patients  a
-	  inner join IPD_Admission b ON a.MRNo = b.MRNo
-	  where b.BillNo IS NULL 
-	  and 
-	  (
-	  a.MRNo like @p
-	  OR a.PatientName LIKE @p
-                    )
-                    ORDER BY a.PatientName";
+            SELECT TOP 10
+            a.AdmNo + ' - ' + a.MRNo + ' - ' + c.PatientName AS Patient
+        FROM IPD_Admission a
+        INNER JOIN EMR_Patients c ON a.MRNo = c.MRNo
+        WHERE a.BillNo IS NULL
+        AND (
+            a.AdmNo LIKE @p 
+            OR a.MRNo LIKE @p
+            OR c.PatientName LIKE @p
+        )
+        ORDER BY c.PatientName";
 
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@p", "%" + prefix + "%");

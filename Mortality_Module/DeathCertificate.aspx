@@ -89,6 +89,8 @@
 </head>
 <body>
     <form id="form1" runat="server">
+        <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
         
         <!-- Simple Navbar -->
         <div class="navbar-custom">
@@ -134,9 +136,13 @@
                         <asp:TextBox ID="txtSearch" runat="server" 
                             CssClass="form-control form-control-lg"
                             placeholder="MR No. / Patient Name / Admission No. / CNIC"
-                            AutoPostBack="true"
-                            OnTextChanged="txtSearch_TextChanged">
+                            ClientIDMode="Static">
                         </asp:TextBox>
+                        <asp:HiddenField ID="hfMRNo" runat="server" />
+                        <asp:HiddenField ID="hfAdmNo" runat="server" />
+                        <asp:Button ID="btnLoadPatient" runat="server" 
+                            OnClick="btnLoadPatient_Click" 
+                            Style="display:none;" />
                         <small class="text-muted">Type at least 2 characters to search</small>
                     </div>
                     <div class="col-md-3">
@@ -319,8 +325,8 @@
                     </div>
                     <div class="p-3 bg-light border-top d-flex justify-content-end gap-2 no-print">
                         <button type="button" class="btn btn-secondary" onclick="closeModal()"><i class="fas fa-times"></i> Close</button>
-                        <button type="button" class="btn btn-primary" onclick="printCertificate()"><i class="fas fa-print"></i> Print Certificate</button>
-                        <button type="button" class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-download"></i> Download PDF</button>
+                        <button type="button" class="btn btn-primary" onclick="redirectToPrint()"><i class="fas fa-print"></i> Print Certificate</button>
+                        <button type="button" class="btn btn-success" onclick="redirectToPrint()"><i class="fas fa-download"></i> Download PDF</button>
                     </div>
                 </div>
             </div>
@@ -331,7 +337,9 @@
         </div>
     </form>
 
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
@@ -359,12 +367,69 @@
             html2pdf().set(opt).from(element).save();
         }
 
+        function redirectToPrint() {
+            var certID = document.getElementById('<%= hdnCertificateID.ClientID %>').value;
+            if (certID) {
+                window.open('PrintCertificate.aspx?CertificateID=' + certID, '_blank');
+            } else {
+                // Draft certificate - use modal print
+                window.print();
+            }
+        }
+
         window.onclick = function (event) {
             var modal = document.getElementById('certificateModal');
             if (event.target === modal) {
                 closeModal();
             }
         }
+
+        // AUTOCOMPLETE SCRIPT
+        $(document).ready(function () {
+            console.log("Autocomplete script loaded");
+            $("#txtSearch").autocomplete({
+                source: function (request, response) {
+                    console.log("Searching for: " + request.term);
+                    $.ajax({
+                        url: "DeathCertificate.aspx/GetPatients",
+                        type: "POST",
+                        data: JSON.stringify({ prefix: request.term }),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (data) {
+                            console.log("Results received: " + data.d.length);
+                            response(data.d);
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Error: " + error);
+                            console.log("Response: " + xhr.responseText);
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    console.log("Item selected: " + ui.item.value);
+                    var selectedValue = ui.item.value;
+                    var parts = selectedValue.split(' - ');
+
+                    if (parts.length >= 3) {
+                        var admNo = parts[0].trim();
+                        var mrNo = parts[1].trim();
+                        var patientName = parts[2].trim();
+
+                        console.log("MRNo: " + mrNo + ", AdmNo: " + admNo);
+                        $("#<%= hfMRNo.ClientID %>").val(mrNo);
+                        $("#<%= hfAdmNo.ClientID %>").val(admNo);
+                        $("#txtSearch").val(selectedValue);
+
+                        console.log("Triggering button click");
+                        $("#<%= btnLoadPatient.ClientID %>").click();
+                    }
+
+                    return false;
+                }
+            });
+        });
     </script>
 </body>
 </html>
