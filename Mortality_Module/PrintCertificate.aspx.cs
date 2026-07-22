@@ -13,6 +13,7 @@ namespace welfareSystem.Mortality_Module
     public partial class PrintCertificate : System.Web.UI.Page
     {
         string mortalityConnection = ConfigurationManager.ConnectionStrings["MortalityDB"].ConnectionString;
+        string hospitalConnection = ConfigurationManager.ConnectionStrings["HospitalDBConnection"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -32,69 +33,242 @@ namespace welfareSystem.Mortality_Module
 
         private void LoadCertificateForPrint(string certID)
         {
+            // First, get the certificate data from MortalityDB to get MR# or ADM#
+            string mrNo = "";
+            string admNo = "";
+
             using (SqlConnection con = new SqlConnection(mortalityConnection))
             {
-                string query = "SELECT * FROM DeathCertificateStore WHERE CertificateID = @ID";
+                string query = "SELECT MRNo, AdmNo, CertificateNo, CauseOfDeath, Diagnosis, DateOfDeath, TimeOfDeath, HandOverName, HandOverRelation FROM DeathCertificateStore WHERE CertificateID = @ID";
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@ID", certID);
                 con.Open();
                 SqlDataReader dr = cmd.ExecuteReader();
                 if (dr.Read())
                 {
-                    GenerateCertificateHTML(dr);
+                    mrNo = dr["MRNo"] != DBNull.Value ? dr["MRNo"].ToString() : "";
+                    admNo = dr["AdmNo"] != DBNull.Value ? dr["AdmNo"].ToString() : "";
                 }
                 else
                 {
                     Response.Write("<script>alert('Certificate not found'); window.close();</script>");
+                    return;
                 }
                 dr.Close();
             }
+
+            // Now fetch patient data from HospitalDB using MR# or ADM#
+            if (!string.IsNullOrEmpty(mrNo) || !string.IsNullOrEmpty(admNo))
+            {
+                GenerateCertificateHTML(mrNo, admNo, certID);
+            }
+            else
+            {
+                Response.Write("<script>alert('No MR# or ADM# found for this certificate'); window.close();</script>");
+            }
         }
 
-        private void GenerateCertificateHTML(SqlDataReader dr)
+        private void GenerateCertificateHTML(string mrNo, string admNo, string certID)
         {
-            string html = @"
-            <div style='font-family: Times New Roman, serif; padding: 40px; max-width: 800px; margin: 0 auto; border: 2px solid #1a5a4c;'>
-                <div style='text-align: center; border-bottom: 3px solid #1a5a4c; padding-bottom: 20px; margin-bottom: 30px;'>
-                    <h1 style='color: #1a5a4c; margin: 0; font-size: 28px;'>HASHIM MEDICAL CITY</h1>
-                    <p style='font-size: 14px; margin: 8px 0; color: #555;'>The Hashim Medical City Hospital, Beside Palm Enclave Society, By-Pass Hyderabad</p>
-                    <h3 style='color: #dc3545; margin: 15px 0; font-size: 24px;'>DEATH CERTIFICATE</h3>
-                </div>
+            // Fetch patient data from HospitalDB using MR# or ADM#
+            string patientName = "";
+            string fatherName = "";
+            string gender = "";
+            string age = "";
+            string cnic = "";
+            string contactNo = "";
+            string address = "";
+            string consultantName = "";
 
-                <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
-                    <tr><td style='padding: 12px 8px; width: 40%; font-weight: bold; border-bottom: 1px solid #ddd;'>Certificate No:</td><td style='padding: 12px 8px; border-bottom: 1px solid #ddd;'>" + dr["CertificateNo"] + @"</td></tr>
-                    <tr style='background: #f8f9fa;'><td style='padding: 12px 8px; font-weight: bold; border-bottom: 1px solid #ddd;'>M.R. No:</td><td style='padding: 12px 8px; border-bottom: 1px solid #ddd;'>" + dr["MRNo"] + @"</td></tr>
-                    <tr><td style='padding: 12px 8px; font-weight: bold; border-bottom: 1px solid #ddd;'>Patient Name:</td><td style='padding: 12px 8px; border-bottom: 1px solid #ddd;'>" + dr["PatientName"] + @"</td></tr>
-                    <tr style='background: #f8f9fa;'><td style='padding: 12px 8px; font-weight: bold; border-bottom: 1px solid #ddd;'>Age / Gender:</td><td style='padding: 12px 8px; border-bottom: 1px solid #ddd;'>" + dr["Age"] + " yrs / " + dr["Gender"] + @"</td></tr>
-                    <tr><td style='padding: 12px 8px; font-weight: bold; border-bottom: 1px solid #ddd;'>CNIC No:</td><td style='padding: 12px 8px; border-bottom: 1px solid #ddd;'>" + dr["CNIC"] + @"</td></tr>
-                    <tr style='background: #f8f9fa;'><td style='padding: 12px 8px; font-weight: bold; border-bottom: 1px solid #ddd;'>Date of Death:</td><td style='padding: 12px 8px; border-bottom: 1px solid #ddd;'>" + Convert.ToDateTime(dr["DateOfDeath"]).ToString("dd-MMM-yyyy") + " at " + dr["TimeOfDeath"] + @"</td></tr>
-                    <tr><td style='padding: 12px 8px; font-weight: bold; border-bottom: 1px solid #ddd;'>Cause of Death:</td><td style='padding: 12px 8px; border-bottom: 1px solid #ddd;'>" + dr["CauseOfDeath"] + @"</td></tr>
-                    <tr style='background: #f8f9fa;'><td style='padding: 12px 8px; font-weight: bold; border-bottom: 1px solid #ddd;'>Diagnosis:</td><td style='padding: 12px 8px; border-bottom: 1px solid #ddd;'>" + dr["Diagnosis"] + @"</td></tr>
-                    <tr><td style='padding: 12px 8px; font-weight: bold; border-bottom: 1px solid #ddd;'>Attending Consultant:</td><td style='padding: 12px 8px; border-bottom: 1px solid #ddd;'>" + dr["ConsultantName"] + @"</td></tr>
-                    <tr style='background: #f8f9fa;'><td style='padding: 12px 8px; font-weight: bold; border-bottom: 1px solid #ddd;'>Body Received By:</td><td style='padding: 12px 8px; border-bottom: 1px solid #ddd;'>" + dr["HandOverName"] + " (" + dr["HandOverRelation"] + @")</td></tr>
-                    <tr><td style='padding: 12px 8px; font-weight: bold; border-bottom: 1px solid #ddd;'>Receiver CNIC / Contact:</td><td style='padding: 12px 8px; border-bottom: 1px solid #ddd;'>" + dr["HandOverCNIC"] + " / " + dr["HandOverCellNo"] + @"</td></tr>
-                </table>
+            using (SqlConnection con = new SqlConnection(hospitalConnection))
+            {
+                string query = @"
+                    SELECT
+    a.MRNo,
+    b.PatientTitle,
+    b.PatientName,
+    b.FatherTitle,
+    b.FatherName,
 
-                <div style='margin-top: 50px; padding-top: 25px; border-top: 2px solid #1a5a4c; display: flex; justify-content: space-between;'>
-                    <div style='text-align: center; width: 45%;'>
-                        <p style='margin: 0; height: 60px;'></p>
-                        <p style='font-weight: bold; margin: 5px 0;'>Medical Officer</p>
-                        <p style='font-size: 12px; margin: 0;'>Hashim Medical City</p>
-                    </div>
-                    <div style='text-align: center; width: 45%;'>
-                        <p style='margin: 0; height: 60px;'></p>
-                        <p style='font-weight: bold; margin: 5px 0;'>Medical Superintendent</p>
-                        <p style='font-size: 12px; margin: 0;'>Hashim Medical City</p>
-                    </div>
-                </div>
+    AGE =
+        CAST(AgeCalc.Years AS VARCHAR(3)) + ' Years ' +
+        CAST(AgeCalc.Months AS VARCHAR(2)) + ' Months ' +
+        CAST(AgeCalc.Days AS VARCHAR(2)) + ' Days',
 
-                <div style='text-align: center; margin-top: 30px; font-size: 11px; color: #666; padding-top: 15px; border-top: 1px dashed #ccc;'>
-                    <p style='margin: 5px 0;'>Issued on: " + DateTime.Now.ToString("dd-MMM-yyyy hh:mm tt") + @" | Computer Generated Certificate</p>
-                    <p style='margin: 5px 0;'>This is a system-generated certificate and requires no signature if digitally verified.</p>
-                </div>
-            </div>";
+    b.Gender,
+    b.Address,
+    b.CNIC,
+    b.CellNo
+FROM IPD_Admission a
+INNER JOIN EMR_Patients b
+    ON a.MRNo = b.MRNo
 
-            litCertificate.Text = html;
+CROSS APPLY
+(
+    SELECT
+        Years = DATEDIFF(YEAR, b.DoB, GETDATE())
+                - CASE
+                    WHEN DATEADD(YEAR, DATEDIFF(YEAR, b.DoB, GETDATE()), b.DoB) > GETDATE()
+                    THEN 1 ELSE 0 END
+) Y
+
+CROSS APPLY
+(
+    SELECT
+        YearDate = DATEADD(YEAR, Y.Years, b.DoB)
+) D1
+
+CROSS APPLY
+(
+    SELECT
+        Months = DATEDIFF(MONTH, D1.YearDate, GETDATE())
+                 - CASE
+                     WHEN DATEADD(MONTH, DATEDIFF(MONTH, D1.YearDate, GETDATE()), D1.YearDate) > GETDATE()
+                     THEN 1 ELSE 0 END
+) M
+
+CROSS APPLY
+(
+    SELECT
+        MonthDate = DATEADD(MONTH, M.Months, D1.YearDate)
+) D2
+
+CROSS APPLY
+(
+    SELECT
+        Years = Y.Years,
+        Months = M.Months,
+        Days = DATEDIFF(DAY, D2.MonthDate, GETDATE())
+) AgeCalc
+                    WHERE (a.MRNo = @MRNo OR a.AdmNo = @AdmNo)";
+
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@MRNo", mrNo);
+                cmd.Parameters.AddWithValue("@AdmNo", admNo);
+                con.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                if (dr.Read())
+                {
+                    patientName = (dr["PatientTitle"] != DBNull.Value ? dr["PatientTitle"].ToString() + " " : "") +
+                                   (dr["PatientName"] != DBNull.Value ? dr["PatientName"].ToString() : "");
+                    fatherName = (dr["FatherTitle"] != DBNull.Value ? dr["FatherTitle"].ToString() + " " : "") +
+                                  (dr["FatherName"] != DBNull.Value ? dr["FatherName"].ToString() : "");
+                    age = dr["AGE"] != DBNull.Value ? dr["AGE"].ToString() : "";
+                    gender = dr["Gender"] != DBNull.Value ? dr["Gender"].ToString() : "";
+                    cnic = dr["CNIC"] != DBNull.Value ? dr["CNIC"].ToString() : "";
+                    contactNo = dr["CellNo"] != DBNull.Value ? dr["CellNo"].ToString() : "";
+                    address = dr["Address"] != DBNull.Value ? dr["Address"].ToString() : "";
+                    consultantName = ""; // Consultant name not in this query, will fetch separately
+                }
+                dr.Close();
+            }
+
+            // Fetch consultant name separately
+            if (string.IsNullOrEmpty(consultantName))
+            {
+                using (SqlConnection con = new SqlConnection(hospitalConnection))
+                {
+                    string query = @"
+                        SELECT ISNULL(e.ConsultantName, 'N/A') AS ConsultantName
+                        FROM IPD_Admission a
+                        LEFT JOIN Gen_Consultants e ON a.ConsultantCode = e.ConsultantCode
+                        WHERE (a.MRNo = @MRNo OR a.AdmNo = @AdmNo)";
+
+                    SqlCommand cmd = new SqlCommand(query, con);
+                    cmd.Parameters.AddWithValue("@MRNo", mrNo);
+                    cmd.Parameters.AddWithValue("@AdmNo", admNo);
+                    con.Open();
+                    object result = cmd.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        consultantName = result.ToString();
+                    }
+                }
+            }
+
+            // Fetch certificate data from MortalityDB using CertificateID
+            string certificateNo = "";
+            string causeOfDeath = "";
+            string diagnosis = "";
+            string dateOfDeath = "";
+            string timeOfDeath = "";
+            string handOverName = "";
+            string handOverRelation = "";
+
+            using (SqlConnection con = new SqlConnection(mortalityConnection))
+            {
+                string query = @"
+                    SELECT 
+                        CertificateNo, CauseOfDeath, Diagnosis, DateOfDeath, TimeOfDeath,
+                        HandOverName, HandOverRelation
+                    FROM DeathCertificateStore 
+                    WHERE CertificateID = @CertificateID";
+
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@CertificateID", certID);
+                con.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                if (dr.Read())
+                {
+                    certificateNo = dr["CertificateNo"] != DBNull.Value ? dr["CertificateNo"].ToString() : "";
+                    causeOfDeath = dr["CauseOfDeath"] != DBNull.Value ? dr["CauseOfDeath"].ToString() : "";
+                    diagnosis = dr["Diagnosis"] != DBNull.Value ? dr["Diagnosis"].ToString() : "";
+                    timeOfDeath = dr["TimeOfDeath"] != DBNull.Value ? dr["TimeOfDeath"].ToString() : "";
+                    handOverName = dr["HandOverName"] != DBNull.Value ? dr["HandOverName"].ToString() : "";
+                    handOverRelation = dr["HandOverRelation"] != DBNull.Value ? dr["HandOverRelation"].ToString() : "son of";
+
+                    if (dr["DateOfDeath"] != DBNull.Value)
+                    {
+                        dateOfDeath = Convert.ToDateTime(dr["DateOfDeath"]).ToString("dd-MMM-yyyy");
+                    }
+                }
+                dr.Close();
+            }
+
+            // Certificate No
+            litCertNo.Text = certificateNo;
+
+            // Date - use print date (current date)
+            litDate.Text = DateTime.Now.ToString("dd-MMM-yyyy");
+
+            // Full Name
+            litFullName.Text = patientName;
+
+            // Guardian Name
+            litGuardianName.Text = fatherName;
+
+            // Age
+            litAge.Text = age;
+
+            // Gender
+            litGender.Text = gender;
+
+            // Address
+            litAddress.Text = address;
+
+            // CNIC
+            litCNIC.Text = cnic;
+
+            // Time of Death
+            litTime.Text = timeOfDeath;
+
+            // Date of Death
+            litDeathDate.Text = dateOfDeath;
+
+            // Place of Death
+            litPlaceOfDeath.Text = "Hashim Medical City";
+
+
+            // Doctor Details
+            litDoctorName.Text = consultantName;
+
+            // Diagnosis
+            litDiagnosis.Text = diagnosis;
+
+            // Cause of Death (Immediate cause)
+            litImmediateCause.Text = causeOfDeath;
         }
     }
 }

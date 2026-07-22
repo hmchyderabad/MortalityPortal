@@ -1,8 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true"
-CodeBehind="PrintCertificate.aspx.cs"
-Inherits="welfareSystem.Mortality_Module.PrintCertificate" %>
-
-<!DOCTYPE html>
+<!doctype html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head runat="server">
@@ -58,25 +54,13 @@ Inherits="welfareSystem.Mortality_Module.PrintCertificate" %>
 
       /* Header */
       .header {
-        display: flex;
-        align-items: center;
+        text-align: center;
         border-bottom: 2px solid #1a5a4c;
         padding-bottom: 15px;
         margin-bottom: 20px;
       }
 
-      .header-logo {
-        width: 80px;
-        height: 80px;
-        margin-right: 20px;
-      }
-
-      .header-content {
-        text-align: center;
-        flex: 1;
-      }
-
-      .header-content h1 {
+      .header h1 {
         margin: 0;
         font-size: 26px;
         color: #1a5a4c;
@@ -84,7 +68,7 @@ Inherits="welfareSystem.Mortality_Module.PrintCertificate" %>
         letter-spacing: 1px;
       }
 
-      .header-content p {
+      .header p {
         margin: 5px 0 0 0;
         font-size: 13px;
         color: #555;
@@ -224,7 +208,7 @@ Inherits="welfareSystem.Mortality_Module.PrintCertificate" %>
         <button type="button" class="btn-print" onclick="window.print()">
           <i class="fas fa-print"></i> Print Certificate
         </button>
-        <button type="button" class="btn-close" onclick="window.location.href='DeathCertificate.aspx'">
+        <button type="button" class="btn-close" onclick="window.close()">
           Close
         </button>
       </div>
@@ -233,11 +217,8 @@ Inherits="welfareSystem.Mortality_Module.PrintCertificate" %>
       <div class="cert-container">
         <!-- Header -->
         <div class="header">
-          <img src="../assets/hmc_logo.png" alt="HMC Logo" class="header-logo" />
-          <div class="header-content">
-            <h1>HASHIM MEDICAL CITY</h1>
-            <p>Hyderabad, Sindh | Phone: 022-3418807-08-09 | www.hmchyd.org</p>
-          </div>
+          <h1>HASHIM MEDICAL CITY</h1>
+          <p>Hyderabad, Sindh | Phone: 022-XXXXXXX | www.hmchyd.org</p>
         </div>
 
         <div class="title">DEATH CERTIFICATE</div>
@@ -246,7 +227,7 @@ Inherits="welfareSystem.Mortality_Module.PrintCertificate" %>
         <div class="meta-row">
           <div>
             Cert. No:
-            <span class="field-inline"
+            <span class="field-inline" style="min-width: 150px"
               ><asp:Literal ID="litCertNo" runat="server"
                 >HMC/DC/</asp:Literal
               ></span
@@ -254,7 +235,7 @@ Inherits="welfareSystem.Mortality_Module.PrintCertificate" %>
           </div>
           <div>
             Date:
-            <span class="field-inline"
+            <span class="field-inline" style="min-width: 120px"
               ><asp:Literal ID="litDate" runat="server">☑</asp:Literal></span
             >
           </div>
@@ -263,93 +244,177 @@ Inherits="welfareSystem.Mortality_Module.PrintCertificate" %>
         <!-- Certificate Body -->
         <div class="cert-body">
           This is to certify that the records in this office confirm that
-          <span class="field-inline"
+          <select class="dropdown-style">
+            <option>Mr.</option>
+            <option>Mrs.</option>
+            <option>Miss</option>
+          </select>
+          <span class="field-inline" style="min-width: 250px"
             ><asp:Literal ID="litFullName" runat="server"
               >Full Name of Deceased</asp:Literal
             ></span
           >
-          <span class="field-inline"
+          <select class="dropdown-style">
+            <option>son of</option>
+            <option>daughter of</option>
+            <option>wife of</option>
+          </select>
+          <span class="field-inline" style="min-width: 250px"
             ><asp:Literal ID="litGuardianName" runat="server"
               >Father/Husband Name</asp:Literal
             ></span
           >
           aged
-          <span class="field-inline"
+          <span class="field-inline" style="min-width: 50px"
             ><asp:Literal ID="litAge" runat="server">Age</asp:Literal></span
-          >, Gender
-          <span class="field-inline"
-            ><asp:Literal ID="litGender" runat="server">Male/Female</asp:Literal
-            ></span
           >
-           resident of
-          <span class="field-inline"
+          years, resident of
+          <span class="field-inline" style="min-width: 300px"
             ><asp:Literal ID="litAddress" runat="server"
               >Permanent Address</asp:Literal
             ></span
           >
           bearing CNIC No.
-          <span class="field-inline"
+          <span class="field-inline" style="min-width: 150px"
             ><asp:Literal ID="litCNIC" runat="server"
               >XXXXX-XXXXXXX-X</asp:Literal
             ></span
           >
-          was declared dead on
-          <span class="field-inline"
+          was declared dead at
+          <span class="field-inline" style="min-width: 100px"
+            ><asp:Literal ID="litTime" runat="server">☑</asp:Literal></span
+          >
+          on
+          <span class="field-inline" style="min-width: 100px"
             ><asp:Literal ID="litDeathDate" runat="server">☑</asp:Literal></span
           >
           at
-          <span class="field-inline"
-            ><asp:Literal ID="litTime" runat="server">☑</asp:Literal></span
-          >
-          at
-          <span class="field-inline"
+          <span class="field-inline" style="min-width: 200px"
             ><asp:Literal ID="litPlaceOfDeath" runat="server"
               >Place of Death</asp:Literal
             ></span
           >.
         </div>
-        <!-- Diagnosis Section -->
+
+        <!-- Classifications Section -->
         <div class="section-block">
-          <strong>Diagnosis:</strong>
-          <table class="cause-table">
-            <tr>
-              <td>
-                <span class="cause-input"
-                  ><asp:Literal ID="litDiagnosis" runat="server"></asp:Literal
-                ></span>
-              </td>
-            </tr>
-          </table>
+          <strong>Gender:</strong>
+          <select class="dropdown-style">
+            <option>Select</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+
+          <input type="checkbox" id="chkMarital" />
+          <strong>Marital Status:</strong>
+          <select class="dropdown-style">
+            <option>Select</option>
+            <option>Single</option>
+            <option>Married</option>
+            <option>Widowed</option>
+            <option>Divorced</option>
+          </select>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+
+          <strong>Religion:</strong>
+          <select class="dropdown-style">
+            <option>Select</option>
+            <option>Islam</option>
+            <option>Christianity</option>
+            <option>Hinduism</option>
+            <option>Other</option>
+          </select>
         </div>
+
         <!-- Cause of Death Section -->
         <div class="section-block">
           <strong>Cause of Death:</strong>
           <table class="cause-table">
             <tr>
+              <td class="cause-label">(a)</td>
               <td>
+                <div style="font-size: 12px; color: #666">
+                  Immediate cause of death
+                </div>
                 <span class="cause-input"
-                  ><asp:Literal
-                    ID="litImmediateCause"
-                    runat="server"
-                  ></asp:Literal
+                  ><asp:Literal ID="litCauseA" runat="server"></asp:Literal
+                ></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="cause-label">(b)</td>
+              <td>
+                <div style="font-size: 12px; color: #666">
+                  Due to/ antecedent cause (if any)
+                </div>
+                <span class="cause-input"
+                  ><asp:Literal ID="litCauseB" runat="server"></asp:Literal
+                ></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="cause-label">(c)</td>
+              <td>
+                <div style="font-size: 12px; color: #666">
+                  Underlying cause (if any)
+                </div>
+                <span class="cause-input"
+                  ><asp:Literal ID="litCauseC" runat="server"></asp:Literal
                 ></span>
               </td>
             </tr>
           </table>
         </div>
 
+        <!-- Manner of Death Section -->
+        <div class="section-block">
+          <input type="checkbox" id="chkManner" />
+          <strong>Manner of Death:</strong>
+          <select class="dropdown-style">
+            <option>Select</option>
+            <option>Natural</option>
+            <option>Accidental</option>
+            <option>Suicide</option>
+            <option>Homicide</option>
+            <option>Pending Investigation</option>
+          </select>
+        </div>
+
+        <!-- Certification Confirmation Line -->
+        <div class="section-block" style="margin-top: 20px">
+          I have hereunto affixed my signature alongside a witness on
+          <span class="field-inline" style="min-width: 80px"
+            ><asp:Literal ID="litAffixedDate" runat="server"
+              >☑</asp:Literal
+            ></span
+          >
+          at Hashim Medical City, Hyderabad.
+        </div>
 
         <!-- Signatures and Seals -->
         <div class="signature-section">
           <div class="sig-box">
             <strong>CERTIFYING MEDICAL OFFICER</strong><br />
             Name:
-            <span class="field-inline"
+            <span class="field-inline" style="width: 70%"
               ><asp:Literal
                 ID="litDoctorName"
                 runat="server"
               ></asp:Literal></span
             ><br />
+            Designation:
+            <span class="field-inline" style="width: 60%"
+              ><asp:Literal
+                ID="litDoctorDesignation"
+                runat="server"
+              ></asp:Literal></span
+            ><br />
+            PMDC Reg. No:
+            <span class="field-inline" style="width: 55%"
+              ><asp:Literal ID="litPMDC" runat="server"></asp:Literal
+            ></span>
           </div>
 
           <div class="seal-box">HOSPITAL<br />OFFICIAL<br />SEAL</div>
@@ -378,13 +443,6 @@ Inherits="welfareSystem.Mortality_Module.PrintCertificate" %>
           For verification contact: Medical Records Department | 022-XXXXXXX
         </div>
       </div>
-
-      <!-- Dynamic Server Control fallback (if needed) -->
-      <asp:Literal
-        ID="litCertificate"
-        runat="server"
-        Visible="false"
-      ></asp:Literal>
     </form>
   </body>
 </html>

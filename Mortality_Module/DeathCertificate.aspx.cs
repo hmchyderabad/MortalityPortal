@@ -20,6 +20,7 @@ namespace welfareSystem.Mortality_Module
         {
             if (!IsPostBack)
             {
+
                 LoadCertificatesGrid();
             }
         }
@@ -153,6 +154,8 @@ namespace welfareSystem.Mortality_Module
             txtRelation.Text = "";
             txtReceiverCNIC.Text = "";
             txtReceiverContact.Text = "";
+            txtDoctorSearch.Text = "";
+            hfDoctorId.Value = "";
             hdnCertificateID.Value = "";
         }
 
@@ -172,11 +175,11 @@ namespace welfareSystem.Mortality_Module
                                 (CertificateNo, MRNo, AdmNo, PatientName, Age, Gender, CNIC, ContactNo,
                                 Diagnosis, DateOfDeath, TimeOfDeath, CauseOfDeath, HandOverName, 
                                 HandOverRelation, HandOverCNIC, HandOverCellNo, ConsultantName, 
-                                CreatedDate, CompCode)
+                                CreatedDate, CompCode, MedicalOfficerId)
                                 VALUES 
                                 (@CertNo, @MRNo, @AdmNo, @PatientName, @Age, @Gender, @CNIC, @Contact,
                                 @Diagnosis, @DOD, @TOD, @Cause, @HandOver, @Relation, @HandCNIC, @HandCell,
-                                @Consultant, GETDATE(), @CompCode)";
+                                @Consultant, GETDATE(), @CompCode, @MedicalOfficerId)";
 
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@CertNo", certificateNo);
@@ -197,6 +200,7 @@ namespace welfareSystem.Mortality_Module
                 cmd.Parameters.AddWithValue("@HandCell", txtReceiverContact.Text);
                 cmd.Parameters.AddWithValue("@Consultant", lblConsultant.Text);
                 cmd.Parameters.AddWithValue("@CompCode", "001");
+                cmd.Parameters.AddWithValue("@MedicalOfficerId", hfDoctorId.Value);
 
                 con.Open();
                 cmd.ExecuteNonQuery();
@@ -349,11 +353,13 @@ namespace welfareSystem.Mortality_Module
                 SqlDataReader dr = cmd.ExecuteReader();
                 if (dr.Read())
                 {
+                    hdnCertificateID.Value = dr["CertificateID"].ToString();
                     GenerateCertificateHTML(dr);
                 }
                 else
                 {
                     // Generate from form data
+                    hdnCertificateID.Value = "";
                     string html = CreateHTMLFromForm();
                     string script = "document.getElementById('certificatePrintArea').innerHTML = `" + html.Replace("`", "\\`") + "`;";
                     ScriptManager.RegisterStartupScript(this, GetType(), "loadCert", script, true);
@@ -430,6 +436,37 @@ namespace welfareSystem.Mortality_Module
             return patients;
         }
 
+        // WEB METHOD FOR DOCTOR AUTOCOMPLETE
+        [System.Web.Services.WebMethod]
+        public static List<string> GetDoctors(string prefix)
+        {
+            List<string> doctors = new List<string>();
+            string cs = ConfigurationManager.ConnectionStrings["HospitalDBConnection"].ConnectionString;
+
+            using (SqlConnection con = new SqlConnection(cs))
+            {
+                string query = @"
+            select TOP 10 ConsultantCode,ConsultantName from Gen_Consultants
+        WHERE (
+            ConsultantCode LIKE @p 
+            OR ConsultantName LIKE @p
+        )
+        ORDER BY ConsultantName";
+
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@p", "%" + prefix + "%");
+                con.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    doctors.Add(dr["ConsultantCode"].ToString() + " - " + dr["ConsultantName"].ToString());
+                }
+            }
+
+            return doctors;
+        }
+
         // LOAD PATIENT DATA WHEN SELECTED FROM AUTOCOMPLETE
         protected void btnLoadPatient_Click(object sender, EventArgs e)
         {
@@ -447,21 +484,32 @@ namespace welfareSystem.Mortality_Module
                 }
 
                 string query = @"
-                    SELECT 
-                        a.MRNo,
-                        a.AdmNo,
-                        c.PatientTitle + ' ' + c.PatientName + ' ' + ISNULL(c.FatherTitle, '') + ' ' + ISNULL(c.FatherName, '') AS PatientFullName,
-                        DATEDIFF(YEAR, c.DoB, GETDATE()) AS Age,
-                        c.Gender, 
-                        c.CellNo, 
-                        c.CNIC, 
-                        e.ConsultantName,
-                        '' AS Diagnosis
-                    FROM IPD_Admission a
-                    INNER JOIN EMR_Patients c ON a.MRNo = c.MRNo
-                    LEFT JOIN Gen_Consultants e ON a.ConsultantCode = e.ConsultantCode
-                    WHERE a.MRNo = @MRNo
-                    AND a.BillNo IS NULL";
+                 
+
+                    SELECT
+    a.MRNo,
+    a.AdmNo,
+    CONCAT(
+        c.PatientTitle, ' ',
+        c.PatientName, ' ',
+        ISNULL(c.FatherTitle, ''), ' ',
+        ISNULL(c.FatherName, '')
+    ) AS PatientFullName,
+    DATEDIFF(YEAR, c.DoB, GETDATE()) AS Age,
+    c.Gender,
+    c.CellNo,
+    c.CNIC,
+    ISNULL(e.ConsultantName, 'N/A') AS ConsultantName
+FROM IPD_Admission a
+INNER JOIN EMR_Patients c
+    ON a.MRNo = c.MRNo
+LEFT JOIN Gen_Consultants e
+    ON a.ConsultantCode = e.ConsultantCode
+WHERE
+    a.BillNo IS NULL
+    AND NULLIF(LTRIM(RTRIM(c.CNIC)), '') IS NOT NULL;
+                    
+                    ";
 
                 using (SqlConnection con = new SqlConnection(connectionString))
                 using (SqlCommand cmd = new SqlCommand(query, con))
@@ -472,6 +520,15 @@ namespace welfareSystem.Mortality_Module
 
                     if (dr.Read())
                     {
+                        // Check if CNIC is null
+                        if (dr["CNIC"] == DBNull.Value || string.IsNullOrEmpty(dr["CNIC"].ToString()))
+                        {
+                            pnlPatientDetails.Visible = false;
+                            pnlCertificateForm.Visible = false;
+                            ScriptManager.RegisterStartupScript(this, GetType(), "alert", "Swal.fire('Error','CNIC Not Defined','error');", true);
+                            return;
+                        }
+
                         lblMRNo.Text = dr["MRNo"].ToString();
                         lblAdmNo.Text = dr["AdmNo"].ToString();
                         lblPatientName.Text = dr["PatientFullName"].ToString();
@@ -479,13 +536,11 @@ namespace welfareSystem.Mortality_Module
                         lblCNIC.Text = dr["CNIC"].ToString();
                         lblContact.Text = dr["CellNo"].ToString();
                         lblConsultant.Text = dr["ConsultantName"] != DBNull.Value ? dr["ConsultantName"].ToString() : "N/A";
-                        lblDiagnosis.Text = dr["Diagnosis"] != DBNull.Value ? dr["Diagnosis"].ToString() : "N/A";
 
                         pnlPatientDetails.Visible = true;
                         pnlCertificateForm.Visible = true;
 
                         // Set default values
-                        txtFinalDiagnosis.Text = dr["Diagnosis"] != DBNull.Value ? dr["Diagnosis"].ToString() : "";
                         hdnCertificateID.Value = "";
                     }
                     else
