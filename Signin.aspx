@@ -1,0 +1,137 @@
+﻿<%@ Page Language="C#"
+    MasterPageFile="AdminMaster.master"
+    AutoEventWireup="true"
+    CodeBehind="Signin.aspx.cs"
+    Inherits="welfareSystem.Signin" %>
+
+<asp:Content ID="Content1"
+    ContentPlaceHolderID="MainContent"
+    runat="server">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet" />
+
+    <style>
+        .login-wrapper {
+            min-height: 85vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f4f7fb;
+            padding: 30px;
+        }
+
+        .login-card {
+            width: 420px;
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.12);
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #1b3c59;
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: gray;
+            margin-bottom: 30px;
+        }
+
+        .form-control {
+            height: 50px;
+            border-radius: 12px;
+        }
+
+        .btn-login {
+            width: 100%;
+            height: 50px;
+            border-radius: 12px;
+            border: none;
+            background: #1b3c59;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #12293d;
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .footer-link a {
+            text-decoration: none;
+            font-weight: 600;
+            color: #1b3c59;
+        }
+    </style>
+
+    <div class="login-wrapper">
+
+        <div class="login-card">
+
+            <div class="login-title">
+                Welfare System
+            </div>
+
+            <div class="login-subtitle">
+                Sign In To Continue
+            </div>
+
+            <div class="mb-3">
+
+                <label>
+                    Username
+                </label>
+
+                <asp:TextBox ID="txtUsername"
+                    runat="server"
+                    CssClass="form-control"
+                    placeholder="Enter Username">
+                </asp:TextBox>
+
+            </div>
+
+            <div class="mb-4">
+
+                <label>
+                    Password
+                </label>
+
+                <asp:TextBox ID="txtPassword"
+                    runat="server"
+                    TextMode="Password"
+                    CssClass="form-control"
+                    placeholder="Enter Password">
+                </asp:TextBox>
+
+            </div>
+
+            <asp:Button ID="btnLogin"
+                runat="server"
+                Text="LOGIN"
+                CssClass="btn-login"
+                OnClick="btnLogin_Click" />
+
+            <div class="footer-link">
+                Don't have an account?
+                <a href="Signup.aspx">
+                    Create Account
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</asp:Content>

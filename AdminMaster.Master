@@ -1,0 +1,528 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="AdminMaster.master.cs" Inherits="welfareSystem.AdminMaster" %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welfare System | Hashim Medical City</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --primary-red: #c82333;
+            --dark-gray: #2c3e50;
+            --light-bg: #f8f9fa;
+            --security-color: #0d6efd;
+            --dashboard-color: #198754;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+        }
+
+        /* TOP NAV (Logo Area) */
+        .navbar-brand-custom {
+            background: white;
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+        }
+
+        .brand-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-red);
+            letter-spacing: -0.5px;
+        }
+
+        .city-text {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        /* MAIN NAVIGATION BAR */
+        .main-nav {
+            background: var(--dark-gray);
+            padding: 0 15px;
+            display: flex;
+            justify-content: flex-start;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+
+        .nav-item-custom {
+            padding: 12px 18px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            min-width: 80px;
+        }
+
+            .nav-item-custom i {
+                font-size: 20px;
+                margin-bottom: 4px;
+            }
+
+            .nav-item-custom:hover, .nav-item-custom.active {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+                border-bottom: 3px solid var(--primary-red);
+            }
+
+            /* MODULE COLORS */
+            .nav-item-custom.welfare-module:hover {
+                border-bottom-color: var(--primary-red);
+            }
+
+            .nav-item-custom.security-module:hover {
+                border-bottom-color: var(--security-color);
+            }
+
+            .nav-item-custom.dashboard-module:hover {
+                border-bottom-color: var(--dashboard-color);
+            }
+
+            .nav-item-custom.welfare-module i {
+                color: #ff6b6b;
+            }
+
+            .nav-item-custom.security-module i {
+                color: #4dabf7;
+            }
+
+            .nav-item-custom.dashboard-module i {
+                color: #69db7c;
+            }
+            .nav-item-custom.mortality-module i {
+                color: #ff6b6b;
+            }
+
+        /* DROPDOWN CUSTOM */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            margin-top: 0;
+            padding: 10px;
+            min-width: 280px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .dropdown-item {
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #444;
+        }
+
+            .dropdown-item:hover {
+                background-color: #f1f3f5;
+                font-weight: 600;
+            }
+
+            /* Module specific dropdown item colors */
+            .dropdown-item.security-item:hover {
+                background-color: #e7f3ff;
+                color: var(--security-color);
+            }
+
+            .dropdown-item.dashboard-item:hover {
+                background-color: #e6f7ec;
+                color: var(--dashboard-color);
+            }
+
+            .dropdown-item.welfare-item:hover {
+                background-color: #ffe8e8;
+                color: var(--primary-red);
+            }
+
+            .dropdown-item.mortality-item:hover {
+                background-color: #ffe8e8;
+                color: var(--primary-red);
+            }
+
+        .modern-dropdown {
+            min-width: 280px;
+            border-radius: 12px;
+        }
+
+        .accordion-button {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+            .accordion-button:not(.collapsed) {
+                background: #f8f9fa;
+                color: #0d6efd;
+            }
+
+        .accordion-item {
+            border: none !important;
+        }
+
+        /* USER INFO BAR */
+        .status-bar {
+            background: var(--primary-red);
+            color: white;
+            padding: 6px 25px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+            .status-bar i {
+                margin-right: 5px;
+            }
+
+            .status-bar .btn-logout {
+                color: #fff;
+                border-color: rgba(255,255,255,0.3);
+            }
+
+                .status-bar .btn-logout:hover {
+                    background: rgba(255,255,255,0.2);
+                    color: #fff;
+                }
+
+        /* CONTENT AREA */
+        .main-content-wrapper {
+            padding: 30px;
+            min-height: 80vh;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-nav {
+                justify-content: center;
+            }
+
+            .nav-item-custom {
+                padding: 8px 12px;
+                font-size: 12px;
+                min-width: 60px;
+            }
+
+            .status-bar {
+                flex-direction: column;
+                gap: 5px;
+                text-align: center;
+            }
+
+            .navbar-brand-custom {
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <form runat="server">
+        <header class="navbar-brand-custom">
+            <div class="brand-text">
+                <i class="fa-solid fa-hospital-user me-2"></i>HMIS Enhancement Portal
+            </div>
+            <div class="city-text">
+                Hashim Medical City <i class="fa-solid fa-location-dot ms-2"></i>
+            </div>
+        </header>
+
+        <nav class="main-nav">
+
+            <!-- ======================== -->
+            <!-- SECURITY MODULE DROPDOWN  -->
+            <!-- ======================== -->
+            <div class="nav-item dropdown">
+                <a class="nav-item-custom security-module dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-shield-alt"></i>
+                    <span>Security</span>
+                </a>
+                <ul class="dropdown-menu shadow p-2 modern-dropdown">
+                    <div class="accordion" id="securityAccordion">
+
+                        <!-- SECURITY FORMS -->
+                        <div class="accordion-item border-0">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed py-2 shadow-none bg-white"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#securityItems"
+                                    onclick="event.stopPropagation();">
+                                    <i class="fa fa-lock me-2 text-primary"></i>Security Management
+                                </button>
+                            </h2>
+                            <div id="securityItems" class="accordion-collapse collapse" data-bs-parent="#securityAccordion">
+                                <div class="accordion-body p-0">
+                                    <asp:Repeater ID="rptSecurity" runat="server">
+                                        <ItemTemplate>
+                                            <a class="dropdown-item security-item" href='<%# Eval("FormUrl") %>'>
+                                                <i class="fa fa-circle me-2 text-primary" style="font-size: 8px;"></i>
+                                                <%# Eval("FormName") %>
+                                            </a>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </ul>
+            </div>
+
+
+
+
+            <!-- ======================== -->
+            <!-- WELFARE MODULE DROPDOWN  -->
+            <!-- ======================== -->
+            <div class="nav-item dropdown">
+                <a class="nav-item-custom welfare-module dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-hand-holding-heart"></i>
+                    <span>Welfare</span>
+                </a>
+                <ul class="dropdown-menu shadow p-2 modern-dropdown">
+                    <div class="accordion" id="menuAccordion">
+
+                        <!-- MASTER -->
+                        <div class="accordion-item border-0">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed py-2 shadow-none bg-white"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#master"
+                                    onclick="event.stopPropagation();">
+                                    <i class="fa fa-cog me-2 text-secondary"></i>Master
+                                </button>
+                            </h2>
+                            <div id="master" class="accordion-collapse collapse" data-bs-parent="#menuAccordion">
+                                <div class="accordion-body p-0">
+                                    <asp:Repeater ID="rptMaster" runat="server">
+                                        <ItemTemplate>
+                                            <a class="dropdown-item welfare-item" href='<%# Eval("FormUrl") %>'>
+                                                <i class="fa fa-circle me-2 text-danger" style="font-size: 8px;"></i>
+                                                <%# Eval("FormName") %>
+                                            </a>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TRANSACTIONS -->
+                        <div class="accordion-item border-0 mt-2">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed py-2 shadow-none bg-white"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#transactions"
+                                    onclick="event.stopPropagation();">
+                                    <i class="fa fa-exchange-alt me-2 text-secondary"></i>Transactions
+                                </button>
+                            </h2>
+                            <div id="transactions" class="accordion-collapse collapse" data-bs-parent="#menuAccordion">
+                                <div class="accordion-body p-0">
+                                    <asp:Repeater ID="rptTransactions" runat="server">
+                                        <ItemTemplate>
+                                            <a class="dropdown-item welfare-item" href='<%# Eval("FormUrl") %>'>
+                                                <i class="fa fa-circle me-2 text-danger" style="font-size: 8px;"></i>
+                                                <%# Eval("FormName") %>
+                                            </a>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- REPORTS -->
+                        <div class="accordion-item border-0 mt-2">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed py-2 shadow-none bg-white"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#reports"
+                                    onclick="event.stopPropagation();">
+                                    <i class="fa fa-chart-bar me-2 text-secondary"></i>Reports
+                                </button>
+                            </h2>
+                            <div id="reports" class="accordion-collapse collapse" data-bs-parent="#menuAccordion">
+                                <div class="accordion-body p-0">
+                                    <asp:Repeater ID="rptReports" runat="server">
+                                        <ItemTemplate>
+                                            <a class="dropdown-item welfare-item" href='<%# Eval("FormUrl") %>'>
+                                                <i class="fa fa-circle me-2 text-danger" style="font-size: 8px;"></i>
+                                                <%# Eval("FormName") %>
+                                            </a>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </ul>
+            </div>
+
+            <!-- ======================== -->
+            <!-- DASHBOARDS MODULE DROPDOWN  -->
+            <!-- ======================== -->
+            <div class="nav-item dropdown">
+                <a class="nav-item-custom dashboard-module dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-chart-pie"></i>
+                    <span>Dashboards</span>
+                </a>
+                <ul class="dropdown-menu shadow p-2 modern-dropdown">
+                    <div class="accordion" id="dashboardAccordion">
+
+                        <!-- DASHBOARD FORMS -->
+                        <div class="accordion-item border-0">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed py-2 shadow-none bg-white"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#dashboardItems"
+                                    onclick="event.stopPropagation();">
+                                    <i class="fa fa-chart-line me-2 text-success"></i>Analytics Dashboard
+                                </button>
+                            </h2>
+                            <div id="dashboardItems" class="accordion-collapse collapse" data-bs-parent="#dashboardAccordion">
+                                <div class="accordion-body p-0">
+                                    <asp:Repeater ID="rptDashboards" runat="server">
+                                        <ItemTemplate>
+                                            <a class="dropdown-item dashboard-item" href='<%# Eval("FormUrl") %>'>
+                                                <i class="fa fa-circle me-2 text-success" style="font-size: 8px;"></i>
+                                                <%# Eval("FormName") %>
+                                            </a>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </ul>
+            </div>
+
+            <!-- ======================== -->
+            <!-- Mortality MODULE DROPDOWN  -->
+            <!-- ======================== -->
+            <div class="nav-item dropdown">
+                <a class="nav-item-custom mortality-module dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-heartbeat"></i>
+                    <span>Mortality</span>
+                </a>
+                <ul class="dropdown-menu shadow p-2 modern-dropdown">
+                    <div class="accordion" id="mortalityAccordion">
+
+                        <!-- MORTALITY FORMS -->
+                        <div class="accordion-item border-0">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed py-2 shadow-none bg-white"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#mortalityItems"
+                                    onclick="event.stopPropagation();">
+                                    <i class="fa fa-heartbeat me-2 text-danger"></i>Mortality
+                                </button>
+                            </h2>
+                            <div id="mortalityItems" class="accordion-collapse collapse" data-bs-parent="#mortalityAccordion">
+                                <div class="accordion-body p-0">
+                                    <asp:Repeater ID="rptMortality" runat="server">
+                                        <ItemTemplate>
+                                            <a class="dropdown-item dashboard-item" href='<%# Eval("FormUrl") %>'>
+                                                <i class="fa fa-circle me-2 text-success" style="font-size: 8px;"></i>
+                                                <%# Eval("FormName") %>
+                                            </a>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </ul>
+            </div>
+
+        </nav>
+
+        <section class="status-bar">
+            <div>
+                <i class="fa fa-door-open"></i>Module: <strong>Welfare</strong>
+            </div>
+            <div>
+                <i class="fa fa-user-circle"></i>Logged in: <strong><span id="lblUsername" runat="server"></span></strong>
+                &nbsp;&nbsp;
+            <asp:LinkButton ID="btnLogout"
+                runat="server"
+                CssClass="btn btn-sm btn-logout border-0"
+                OnClick="btnLogout_Click">
+                <i class="fa fa-sign-out-alt"></i> Logout
+            </asp:LinkButton>
+            </div>
+        </section>
+
+        <main class="main-content-wrapper">
+            <div class="container-fluid">
+                <asp:ContentPlaceHolder ID="MainContent" runat="server"></asp:ContentPlaceHolder>
+            </div>
+        </main>
+
+    </form>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+   <script>
+    $(document).ready(function () {
+        $('.select2').select2({
+            placeholder: "Select...",
+            allowClear: true
+        });
+    }); 
+        // Prevent accordion from closing dropdown when clicking headers
+        document.querySelectorAll('.accordion-button').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+        });
+
+        // Close dropdown when clicking a link inside it
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function () {
+                const dropdown = this.closest('.dropdown-menu');
+                if (dropdown) {
+                    const parentDrop = dropdown.parentElement;
+                    const toggle = parentDrop.querySelector('.dropdown-toggle');
+                    if (toggle) {
+                        const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
+                        if (bsDropdown) {
+                            bsDropdown.hide();
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
