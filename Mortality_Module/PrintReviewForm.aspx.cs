@@ -81,7 +81,6 @@ namespace welfareSystem.Mortality_Module
                     // Patient Identification
                     lblPatientName.Text = dr["PatientName"] != DBNull.Value ? dr["PatientName"].ToString() : "";
                     lblMRNo.Text = dr["MRNo"] != DBNull.Value ? dr["MRNo"].ToString() : "";
-                    lblSerialNo.Text = ReviewFormID;
 
                     // Death Certificate Serial #
                     lblDeathCertSerial.Text = dr["CertificateNo"] != DBNull.Value ? dr["CertificateNo"].ToString() : "";
@@ -170,11 +169,19 @@ namespace welfareSystem.Mortality_Module
                 {
                     // Date of Review
                     lblDateOfReview.Text = dr["CreatedDate"] != DBNull.Value ? Convert.ToDateTime(dr["CreatedDate"]).ToString("dd-MMM-yyyy") : "";
+                    lblSerialNo.Text = dr["ReviewFormID"] != DBNull.Value ? dr["ReviewFormID"].ToString() : "";
 
                     // Date Shifted into Critical Ward
-                    if (dr["DateShiftedToCriticalWard"] != DBNull.Value)
+                    if (dr["DateTimeShiftedToCriticalWard"] != DBNull.Value)
                     {
-                        lblDateShiftedCritical.Text = Convert.ToDateTime(dr["DateShiftedToCriticalWard"]).ToString("dd-MMM-yyyy");
+                        lblDateShiftedCritical.Text = Convert.ToDateTime(dr["DateTimeShiftedToCriticalWard"]).ToString("dd-MMM-yyyy hh:mm tt");
+                    }
+
+                    // Ward Name Shifted Into Critical Ward
+                    if (dr["ShiftedIntoCriticalWard"] != DBNull.Value)
+                    {
+                        string wardCode = dr["ShiftedIntoCriticalWard"].ToString();
+                        lblShiftedIntoCriticalWard.Text = GetWardName(wardCode);
                     }
 
                     // Co-morbidities
@@ -218,6 +225,24 @@ namespace welfareSystem.Mortality_Module
             lblY.Text = (value == "Y") ? "✓" : "";
             lblN.Text = (value == "N") ? "✓" : "";
             lblNA.Text = (value == "NA") ? "✓" : "";
+        }
+
+        private string GetWardName(string wardCode)
+        {
+            string wardName = "";
+            using (SqlConnection con = new SqlConnection(hospitalConnection))
+            {
+                string query = "SELECT WardName FROM Gen_WardMaster WHERE WardCode = @WardCode";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@WardCode", wardCode);
+                con.Open();
+                object result = cmd.ExecuteScalar();
+                if (result != null)
+                {
+                    wardName = result.ToString();
+                }
+            }
+            return wardName;
         }
     }
 }

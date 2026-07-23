@@ -23,6 +23,15 @@ namespace welfareSystem.Mortality_Module
         protected global::System.Web.UI.WebControls.TextBox txtDateShifted;
 
         /// <summary>
+        /// ddlShiftedIntoCriticalWard control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlShiftedIntoCriticalWard;
+
+        /// <summary>
         /// txtPrimaryDiagnosis control.
         /// </summary>
         /// <remarks>

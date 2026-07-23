@@ -13,6 +13,7 @@ namespace welfareSystem.Mortality_Module
     public partial class ReviewForm : System.Web.UI.Page
     {
         string mortalityConnection = ConfigurationManager.ConnectionStrings["MortalityDB"].ConnectionString;
+        string hospitalConnection = ConfigurationManager.ConnectionStrings["HospitalDBConnection"].ConnectionString;
 
         public string CertificateNo { get; set; }
         public string MRNo { get; set; }
@@ -39,6 +40,7 @@ namespace welfareSystem.Mortality_Module
             if (!IsPostBack)
             {
                 LoadCertificateData();
+                LoadWards();
             }
         }
 
@@ -90,6 +92,24 @@ namespace welfareSystem.Mortality_Module
             }
         }
 
+        private void LoadWards()
+        {
+            using (SqlConnection con = new SqlConnection(hospitalConnection))
+            {
+                string query = @"SELECT WardCode, WardName FROM Gen_WardMaster ORDER BY WardName";
+                SqlCommand cmd = new SqlCommand(query, con);
+                con.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                ddlShiftedIntoCriticalWard.DataSource = dr;
+                ddlShiftedIntoCriticalWard.DataTextField = "WardName";
+                ddlShiftedIntoCriticalWard.DataValueField = "WardCode";
+                ddlShiftedIntoCriticalWard.DataBind();
+
+                dr.Close();
+            }
+        }
+
         protected void btnSaveReview_Click(object sender, EventArgs e)
         {
             // Save review form data
@@ -105,62 +125,28 @@ namespace welfareSystem.Mortality_Module
                 int existingCount = Convert.ToInt32(checkCmd.ExecuteScalar());
                 con.Close();
 
-                string query;
-                if (existingCount > 0)
-                {
-                    // Update existing record
-                    query = @"UPDATE DeathCertificateReview
-                            SET DateShiftedToCriticalWard = @DateShifted,
-                                CoMorbidities = @CoMorbidities,
-                                BriefClinicalSummary = @ClinicalSummary,
-                                ExpectedDeath = @ExpectedDeath,
-                                ExpectedDeathRemark = @ExpectedDeathRemark,
-                                CodeDecision = @CodeDecision,
-                                CodeDecisionRemark = @CodeDecisionRemark,
-                                DelayDiagnosis = @DelayDiagnosis,
-                                DelayDiagnosisRemark = @DelayDiagnosisRemark,
-                                DelayTreatment = @DelayTreatment,
-                                DelayTreatmentRemark = @DelayTreatmentRemark,
-                                GuidelinesFollowed = @GuidelinesFollowed,
-                                GuidelinesFollowedRemark = @GuidelinesFollowedRemark,
-                                Communication = @Communication,
-                                CommunicationRemark = @CommunicationRemark,
-                                Documentation = @Documentation,
-                                DocumentationRemark = @DocumentationRemark,
-                                IcuReturn = @IcuReturn,
-                                IcuReturnRemark = @IcuReturnRemark,
-                                IncidentReported = @IncidentReported,
-                                IncidentReportedRemark = @IncidentReportedRemark,
-                                SentinelEvent = @SentinelEvent,
-                                SentinelEventRemark = @SentinelEventRemark,
-                                HAIReported = @HAIReported,
-                                HAIReportedRemark = @HAIReportedRemark,
-                                UpdatedDate = GETDATE()
-                            WHERE CertificateID = @CertificateID";
-                }
-                else
-                {
-                    // Insert new record
-                    query = @"INSERT INTO DeathCertificateReview
-                            (CertificateID, DateShiftedToCriticalWard, CoMorbidities, BriefClinicalSummary,
+                string query = @"INSERT INTO DeathCertificateReview
+                            (CertificateID, DateTimeShiftedToCriticalWard, ShiftedIntoCriticalWard, CoMorbidities, BriefClinicalSummary,
                             ExpectedDeath, ExpectedDeathRemark, CodeDecision, CodeDecisionRemark,
                             DelayDiagnosis, DelayDiagnosisRemark, DelayTreatment, DelayTreatmentRemark,
                             GuidelinesFollowed, GuidelinesFollowedRemark, Communication, CommunicationRemark,
                             Documentation, DocumentationRemark, IcuReturn, IcuReturnRemark,
                             IncidentReported, IncidentReportedRemark, SentinelEvent, SentinelEventRemark,
-                            HAIReported, HAIReportedRemark, CreatedDate, CreatedBy)
+                            HAIReported, HAIReportedRemark, CreatedDate, CreatedBy, ReviewFormID)
                             VALUES
-                            (@CertificateID, @DateShifted, @CoMorbidities, @ClinicalSummary,
+                            (@CertificateID, @DateTimeShifted, @ShiftedIntoCriticalWard, @CoMorbidities, @ClinicalSummary,
                             @ExpectedDeath, @ExpectedDeathRemark, @CodeDecision, @CodeDecisionRemark,
                             @DelayDiagnosis, @DelayDiagnosisRemark, @DelayTreatment, @DelayTreatmentRemark,
                             @GuidelinesFollowed, @GuidelinesFollowedRemark, @Communication, @CommunicationRemark,
                             @Documentation, @DocumentationRemark, @IcuReturn, @IcuReturnRemark,
                             @IncidentReported, @IncidentReportedRemark, @SentinelEvent, @SentinelEventRemark,
-                            @HAIReported, @HAIReportedRemark, GETDATE(), @CreatedBy)";
-                }
+                            @HAIReported, @HAIReportedRemark, GETDATE(), @CreatedBy, @ReviewFormID)";
+
 
                 SqlCommand cmd = new SqlCommand(query, con);
-                cmd.Parameters.AddWithValue("@DateShifted", txtDateShifted.Text);
+                cmd.Parameters.AddWithValue("@ReviewFormID", GenerateReviewFormNumber());
+                cmd.Parameters.AddWithValue("@DateTimeShifted", string.IsNullOrEmpty(txtDateShifted.Text) ? (object)DBNull.Value : DateTime.Parse(txtDateShifted.Text));
+                cmd.Parameters.AddWithValue("@ShiftedIntoCriticalWard", ddlShiftedIntoCriticalWard.SelectedValue);
                 cmd.Parameters.AddWithValue("@CoMorbidities", txtCoMorbidities.Text);
                 cmd.Parameters.AddWithValue("@ClinicalSummary", txtBriefClinicalSummary.Text);
 
@@ -225,6 +211,23 @@ namespace welfareSystem.Mortality_Module
             if (rbN.Checked) return "N";
             if (rbNA.Checked) return "NA";
             return "";
+        }
+
+         private string GenerateReviewFormNumber()
+        {
+            string year = DateTime.Now.Year.ToString();
+            string prefix = "RF/" + year + "/";
+
+            using (SqlConnection con = new SqlConnection(mortalityConnection))
+            {
+                string query = "SELECT COUNT(*) FROM DeathCertificateStore WHERE CertificateNo LIKE @prefix + '%'";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@prefix", prefix);
+                con.Open();
+                int count = Convert.ToInt32(cmd.ExecuteScalar()) + 1;
+                con.Close();
+                return prefix + count.ToString("D6");
+            }
         }
 
         protected void btnBack_Click(object sender, EventArgs e)

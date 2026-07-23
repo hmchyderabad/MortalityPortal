@@ -105,6 +105,15 @@ namespace welfareSystem.Mortality_Module
         protected global::System.Web.UI.WebControls.Label lblDateShiftedCritical;
 
         /// <summary>
+        /// lblShiftedIntoCriticalWard control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblShiftedIntoCriticalWard;
+
+        /// <summary>
         /// lblDateTimeOfDeath control.
         /// </summary>
         /// <remarks>

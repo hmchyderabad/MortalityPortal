@@ -172,16 +172,28 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="fw-bold">Date of Shifted into Critical Ward</label>
+                <label class="fw-bold">Shifted into Critical Ward</label>
+                <asp:DropDownList
+                  ID="ddlShiftedIntoCriticalWard"
+                  runat="server"
+                  CssClass="form-control"
+                >
+                  <asp:ListItem Value="">-- Select Ward --</asp:ListItem>
+                </asp:DropDownList>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="fw-bold">Date and Time of Shifted into Critical Ward</label>
                 <asp:TextBox
                   ID="txtDateShifted"
                   runat="server"
                   CssClass="form-control"
-                  TextMode="Date"
+                  TextMode="DateTimeLocal"
                 ></asp:TextBox>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-12">
               <div class="mb-3">
                 <label class="fw-bold">Co-morbidites</label>
                 <asp:TextBox
