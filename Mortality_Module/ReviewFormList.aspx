@@ -175,12 +175,15 @@
                             <ItemTemplate>
                                 <div class="action-buttons">
                                     <asp:LinkButton ID="btnPrint" runat="server" CommandName="PrintRecord" 
-                                        CommandArgument='<%# Eval("ReviewID") %>' CssClass="btn-print" Text="� Print" />
+                                        CommandArgument='<%# Eval("ReviewID") %>' CssClass="btn-print" Text="� Print" 
+                                        CausesValidation="false" />
                                     <asp:LinkButton ID="btnEdit" runat="server" CommandName="EditRecord" 
-                                        CommandArgument='<%# Eval("ReviewID") %>' CssClass="btn-edit" Text="✏ Edit" />
+                                        CommandArgument='<%# Eval("ReviewID") %>' CssClass="btn-edit" Text="✏ Edit" 
+                                        CausesValidation="false" />
                                     <asp:LinkButton ID="btnDelete" runat="server" CommandName="DeleteRecord" 
                                         CommandArgument='<%# Eval("ReviewID") %>' CssClass="btn-delete" Text="🗑 Delete" 
-                                        OnClientClick="return confirm('Are you sure you want to delete this review form?');" />
+                                        OnClientClick="return confirm('Are you sure you want to delete this review form?');" 
+                                        CausesValidation="false" />
                                 </div>
                             </ItemTemplate>
                         </asp:TemplateField>

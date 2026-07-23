@@ -96,7 +96,9 @@
     <Content Include="Mortality_Module\DeathCertificate.aspx" />
     <Content Include="Mortality_Module\DeathCertificateEdit.aspx" />
     <Content Include="Mortality_Module\DeathCertificateList.aspx" />
+    <Content Include="Mortality_Module\EditReviewForm.aspx" />
     <Content Include="Mortality_Module\PrintCertificate.aspx" />
+    <Content Include="Mortality_Module\PrintReviewForm.aspx" />
     <Content Include="Mortality_Module\ReviewForm.aspx" />
     <Content Include="Mortality_Module\ReviewFormList.aspx" />
     <Content Include="Mortality_Module\View.aspx" />
@@ -300,12 +302,26 @@
     <Compile Include="Mortality_Module\DeathCertificateList.aspx.designer.cs">
       <DependentUpon>DeathCertificateList.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Mortality_Module\EditReviewForm.aspx.cs">
+      <DependentUpon>EditReviewForm.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Mortality_Module\EditReviewForm.aspx.designer.cs">
+      <DependentUpon>EditReviewForm.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Mortality_Module\PrintCertificate.aspx.cs">
       <DependentUpon>PrintCertificate.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Mortality_Module\PrintCertificate.aspx.designer.cs">
       <DependentUpon>PrintCertificate.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Mortality_Module\PrintReviewForm.aspx.cs">
+      <DependentUpon>PrintReviewForm.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Mortality_Module\PrintReviewForm.aspx.designer.cs">
+      <DependentUpon>PrintReviewForm.aspx</DependentUpon>
     </Compile>
     <Compile Include="Mortality_Module\ReviewForm.aspx.cs">
       <DependentUpon>ReviewForm.aspx</DependentUpon>

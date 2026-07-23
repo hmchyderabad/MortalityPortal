@@ -55,7 +55,7 @@ namespace welfareSystem.Mortality_Module
 
             if (e.CommandName == "PrintRecord")
             {
-                Response.Redirect($"View.aspx?CertificateID={GetCertificateID(reviewID)}&print=1");
+                Response.Redirect($"PrintReviewForm.aspx?ReviewID={reviewID}");
             }
             else if (e.CommandName == "EditRecord")
             {

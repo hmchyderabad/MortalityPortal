@@ -43,9 +43,35 @@ namespace welfareSystem.Mortality_Module
             }
         }
 
+        private string GetCertificateIDFromReviewID(int reviewId)
+        {
+            string certificateID = "";
+            using (SqlConnection con = new SqlConnection(mortalityConnection))
+            {
+                string query = "SELECT CertificateID FROM DeathCertificateReview WHERE ReviewID = @ReviewID";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@ReviewID", reviewId);
+                con.Open();
+                object result = cmd.ExecuteScalar();
+                if (result != null)
+                {
+                    certificateID = result.ToString();
+                }
+            }
+            return certificateID;
+        }
+
         private void LoadCertificateData()
         {
-            string certificateID = Request.QueryString["CertificateID"];
+            string reviewID = Request.QueryString["ReviewID"];
+
+            if (string.IsNullOrEmpty(reviewID))
+            {
+                Response.Redirect("DeathCertificate.aspx");
+                return;
+            }
+
+            string certificateID = GetCertificateIDFromReviewID(Convert.ToInt32(reviewID));
 
             if (string.IsNullOrEmpty(certificateID))
             {
@@ -93,13 +119,13 @@ namespace welfareSystem.Mortality_Module
 
         private void LoadReviewData()
         {
-            string certificateID = Request.QueryString["CertificateID"];
+            string reviewID = Request.QueryString["ReviewID"];
 
             using (SqlConnection con = new SqlConnection(mortalityConnection))
             {
-                string query = @"SELECT * FROM DeathCertificateReview WHERE CertificateID = @CertificateID";
+                string query = @"SELECT * FROM DeathCertificateReview WHERE ReviewID = @ReviewID";
                 SqlCommand cmd = new SqlCommand(query, con);
-                cmd.Parameters.AddWithValue("@CertificateID", certificateID);
+                cmd.Parameters.AddWithValue("@ReviewID", reviewID);
                 con.Open();
                 SqlDataReader dr = cmd.ExecuteReader();
 
@@ -155,7 +181,7 @@ namespace welfareSystem.Mortality_Module
 
         protected void btnUpdateReview_Click(object sender, EventArgs e)
         {
-            string certificateID = Request.QueryString["CertificateID"];
+            string reviewID = Request.QueryString["ReviewID"];
 
             using (SqlConnection con = new SqlConnection(mortalityConnection))
             {
@@ -186,7 +212,7 @@ namespace welfareSystem.Mortality_Module
                             HAIReported = @HAIReported,
                             HAIReportedRemark = @HAIReportedRemark,
                             UpdatedDate = GETDATE()
-                        WHERE CertificateID = @CertificateID";
+                        WHERE ReviewID = @ReviewID";
 
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@DateShifted", txtDateShifted.Text);
@@ -226,7 +252,7 @@ namespace welfareSystem.Mortality_Module
                 cmd.Parameters.AddWithValue("@HAIReported", GetRadioButtonValue(rbHaiY, rbHaiN, rbHaiNA));
                 cmd.Parameters.AddWithValue("@HAIReportedRemark", txtHaiRemark.Text);
 
-                cmd.Parameters.AddWithValue("@CertificateID", certificateID);
+                cmd.Parameters.AddWithValue("@ReviewID", reviewID);
 
                 con.Open();
                 cmd.ExecuteNonQuery();
@@ -246,7 +272,9 @@ namespace welfareSystem.Mortality_Module
 
         protected void btnBack_Click(object sender, EventArgs e)
         {
-            Response.Redirect("View.aspx?CertificateID=" + Request.QueryString["CertificateID"]);
+            string reviewID = Request.QueryString["ReviewID"];
+            string certificateID = GetCertificateIDFromReviewID(Convert.ToInt32(reviewID));
+            Response.Redirect("View.aspx?CertificateID=" + certificateID);
         }
     }
 }
