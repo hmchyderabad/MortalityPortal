@@ -280,7 +280,7 @@
                                 <div class="accordion-body p-0">
                                     <asp:Repeater ID="rptSecurity" runat="server">
                                         <ItemTemplate>
-                                            <a class="dropdown-item security-item" href='<%# Eval("FormUrl") %>'>
+                                            <a class="dropdown-item security-item" href='<%# ResolveUrl(Eval("FormUrl").ToString()) %>'>
                                                 <i class="fa fa-circle me-2 text-primary" style="font-size: 8px;"></i>
                                                 <%# Eval("FormName") %>
                                             </a>
@@ -323,7 +323,7 @@
                                 <div class="accordion-body p-0">
                                     <asp:Repeater ID="rptMaster" runat="server">
                                         <ItemTemplate>
-                                            <a class="dropdown-item welfare-item" href='<%# Eval("FormUrl") %>'>
+                                            <a class="dropdown-item welfare-item" href='<%# ResolveUrl(Eval("FormUrl").ToString()) %>'>
                                                 <i class="fa fa-circle me-2 text-danger" style="font-size: 8px;"></i>
                                                 <%# Eval("FormName") %>
                                             </a>
@@ -348,7 +348,7 @@
                                 <div class="accordion-body p-0">
                                     <asp:Repeater ID="rptTransactions" runat="server">
                                         <ItemTemplate>
-                                            <a class="dropdown-item welfare-item" href='<%# Eval("FormUrl") %>'>
+                                            <a class="dropdown-item welfare-item" href='<%# ResolveUrl(Eval("FormUrl").ToString()) %>'>
                                                 <i class="fa fa-circle me-2 text-danger" style="font-size: 8px;"></i>
                                                 <%# Eval("FormName") %>
                                             </a>
@@ -373,7 +373,7 @@
                                 <div class="accordion-body p-0">
                                     <asp:Repeater ID="rptReports" runat="server">
                                         <ItemTemplate>
-                                            <a class="dropdown-item welfare-item" href='<%# Eval("FormUrl") %>'>
+                                            <a class="dropdown-item welfare-item" href='<%# ResolveUrl(Eval("FormUrl").ToString()) %>'>
                                                 <i class="fa fa-circle me-2 text-danger" style="font-size: 8px;"></i>
                                                 <%# Eval("FormName") %>
                                             </a>
@@ -413,7 +413,7 @@
                                 <div class="accordion-body p-0">
                                     <asp:Repeater ID="rptDashboards" runat="server">
                                         <ItemTemplate>
-                                            <a class="dropdown-item dashboard-item" href='<%# Eval("FormUrl") %>'>
+                                            <a class="dropdown-item dashboard-item" href='<%# ResolveUrl(Eval("FormUrl").ToString()) %>'>
                                                 <i class="fa fa-circle me-2 text-success" style="font-size: 8px;"></i>
                                                 <%# Eval("FormName") %>
                                             </a>
@@ -453,7 +453,7 @@
                                 <div class="accordion-body p-0">
                                     <asp:Repeater ID="rptMortality" runat="server">
                                         <ItemTemplate>
-                                            <a class="dropdown-item dashboard-item" href='<%# Eval("FormUrl") %>'>
+                                            <a class="dropdown-item dashboard-item" href='<%# ResolveUrl(Eval("FormUrl").ToString()) %>'>
                                                 <i class="fa fa-circle me-2 text-success" style="font-size: 8px;"></i>
                                                 <%# Eval("FormName") %>
                                             </a>

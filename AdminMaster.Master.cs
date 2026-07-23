@@ -152,7 +152,7 @@ namespace welfareSystem
                 Response.Cookies["ASP.NET_SessionId"].Expires = DateTime.Now.AddDays(-1);
             }
 
-            Response.Redirect("Login.aspx");
+            Response.Redirect(ResolveUrl("~/Login.aspx"));
         }
     }
 }

@@ -1,26 +1,11 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true"
+﻿<%@ Page Title="Death Certificate" Language="C#" MasterPageFile="~/AdminMaster.Master" AutoEventWireup="true"
 CodeBehind="DeathCertificate.aspx.cs"
 Inherits="welfareSystem.Mortality_Module.DeathCertificate" %>
 
-<!DOCTYPE html>
-<html lang="en">
-  <head runat="server">
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Death Certificate - Hashim Medical City</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
     <style>
-      body {
-        background: #eef2f9;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      }
       .certificate-card {
         background: linear-gradient(135deg, #f5f7fa 0%, #fff 100%);
         border-radius: 20px;
@@ -89,46 +74,9 @@ Inherits="welfareSystem.Mortality_Module.DeathCertificate" %>
         color: #1a5a4c;
         font-weight: 700;
       }
-      .navbar-custom {
-        background: #1a5a4c;
-        padding: 10px 20px;
-        color: white;
-        margin-bottom: 20px;
-      }
     </style>
-  </head>
-  <body>
-    <form id="form1" runat="server">
-      <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
-      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
-      <!-- Simple Navbar -->
-      <div class="navbar-custom">
-        <div class="container">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h4 class="mb-0">
-                <i class="fas fa-hospital"></i> Hashim Medical City
-              </h4>
-              <small>Death Certificate Management System</small>
-            </div>
-            <%--
-            <div>
-              <asp:LinkButton
-                ID="btnLogout"
-                runat="server"
-                CssClass="btn btn-light btn-sm"
-                OnClick="btnLogout_Click"
-              >
-                <i class="fas fa-sign-out-alt"></i> Logout
-              </asp:LinkButton>
-            </div>
-            --%>
-          </div>
-        </div>
-      </div>
-
-      <div class="container mt-4">
+    <div class="container mt-4">
         <!-- Page Header -->
         <div class="row mb-4">
           <div class="col-12">
@@ -584,7 +532,6 @@ Inherits="welfareSystem.Mortality_Module.DeathCertificate" %>
         <asp:HiddenField ID="hdnCertData" runat="server" />
         <asp:HiddenField ID="hdnCertificateID" runat="server" />
       </div>
-    </form>
 
     <link
       rel="stylesheet"
@@ -592,7 +539,6 @@ Inherits="welfareSystem.Mortality_Module.DeathCertificate" %>
     />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
       function showCertificateModal() {
@@ -726,5 +672,4 @@ Inherits="welfareSystem.Mortality_Module.DeathCertificate" %>
         });
       });
     </script>
-  </body>
-</html>
+</asp:Content>

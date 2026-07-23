@@ -244,7 +244,12 @@ namespace welfareSystem.Mortality_Module
 
         protected void gvCertificates_RowCommand(object sender, GridViewCommandEventArgs e)
         {
-            if (e.CommandName == "ViewCert" || e.CommandName == "PrintCert")
+            if (e.CommandName == "ViewCert")
+            {
+                string certID = e.CommandArgument.ToString();
+                Response.Redirect("View.aspx?CertificateID=" + certID);
+            }
+            else if (e.CommandName == "PrintCert")
             {
                 string certID = e.CommandArgument.ToString();
                 Response.Redirect("PrintCertificate.aspx?CertificateID=" + certID);
