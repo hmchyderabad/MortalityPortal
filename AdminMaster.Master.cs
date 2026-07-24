@@ -43,9 +43,9 @@ namespace welfareSystem
                         F.FormName,
                         F.FormUrl,
                         F.MenuCategory
-                    FROM UserForms UF
-                    INNER JOIN Forms F ON UF.FormId = F.FormId
-                    WHERE UF.UserId = @UserId
+                    FROM UserFormPermissions UFP
+                    INNER JOIN Forms F ON UFP.FormId = F.FormId
+                    WHERE UFP.UserId = @UserId AND UFP.CanIndex = 1
                     ORDER BY 
                         CASE F.MenuCategory
                             WHEN 'Master' THEN 1

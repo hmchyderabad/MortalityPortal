@@ -3,9 +3,9 @@ AutoEventWireup="true" CodeBehind="Signup.aspx.cs"
 Inherits="welfareSystem.Signup" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-  <div class="container">
+  <div class="container-fluid">
     <div class="row justify-content-center">
-      <div class="col-xl-8 col-lg-10 col-md-12">
+      <div class="col-xl-12 col-lg-12 col-md-12">
         <!-- Signup Form Card -->
         <div class="card shadow-lg border-0 mb-5">
           <div class="card-header bg-gradient-primary text-white py-3">
@@ -14,62 +14,67 @@ Inherits="welfareSystem.Signup" %>
             </h4>
           </div>
           <div class="card-body p-4">
-            <div class="mb-3">
-              <label for="txtName" class="form-label fw-semibold">
-                <i class="fas fa-user me-2 text-muted"></i>Full Name
-              </label>
-              <asp:TextBox
-                ID="txtName"
-                runat="server"
-                CssClass="form-control"
-                placeholder="Enter your full name"
-              />
-            </div>
-
-            <div class="mb-3">
-              <label for="txtUsername" class="form-label fw-semibold">
-                <i class="fas fa-at me-2 text-muted"></i>Username
-              </label>
-              <asp:TextBox
-                ID="txtUsername"
-                runat="server"
-                CssClass="form-control"
-                placeholder="Choose a username"
-              />
-            </div>
-
-            <div class="mb-3">
-              <label for="txtPassword" class="form-label fw-semibold">
-                <i class="fas fa-lock me-2 text-muted"></i>Password
-              </label>
-              <div class="input-group">
+            <div class="row">
+              <div class="mb-3 col-6">
+                <label for="txtName" class="form-label fw-semibold">
+                  <i class="fas fa-user me-2 text-muted"></i>Full Name
+                </label>
                 <asp:TextBox
-                  ID="txtPassword"
+                  ID="txtName"
                   runat="server"
-                  TextMode="Password"
                   CssClass="form-control"
-                  placeholder="Enter password"
+                  placeholder="Enter your full name"
                 />
-                <button
-                  type="button"
-                  class="btn btn-outline-secondary"
-                  onclick="togglePassword()"
-                  id="togglePasswordBtn"
+              </div>
+
+              <div class="mb-3 col-6">
+                <label for="txtUsername" class="form-label fw-semibold">
+                  <i class="fas fa-at me-2 text-muted"></i>Username
+                </label>
+                <asp:TextBox
+                  ID="txtUsername"
+                  runat="server"
+                  CssClass="form-control"
+                  placeholder="Choose a username"
+                />
+              </div>
+
+              <div class="mb-3 col-6">
+                <label for="txtPassword" class="form-label fw-semibold">
+                  <i class="fas fa-lock me-2 text-muted"></i>Password
+                </label>
+                <div class="input-group">
+                  <asp:TextBox
+                    ID="txtPassword"
+                    runat="server"
+                    TextMode="Password"
+                    CssClass="form-control"
+                    placeholder="Enter password"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    onclick="togglePassword()"
+                    id="togglePasswordBtn"
+                  >
+                    <i class="fas fa-eye" id="eyeIcon"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="mb-4 col-6">
+                <label for="ddlRole" class="form-label fw-semibold">
+                  <i class="fas fa-user-tag me-2 text-muted"></i>Role
+                </label>
+                <asp:DropDownList
+                  ID="ddlRole"
+                  runat="server"
+                  CssClass="form-select"
                 >
-                  <i class="fas fa-eye" id="eyeIcon"></i>
-                </button>
+                </asp:DropDownList>
               </div>
             </div>
-
-            <div class="mb-4">
-              <label for="ddlRole" class="form-label fw-semibold">
-                <i class="fas fa-user-tag me-2 text-muted"></i>Role
-              </label>
-              <asp:DropDownList ID="ddlRole" runat="server" CssClass="form-select">
-              </asp:DropDownList>
-            </div>
-
-            <div class="d-grid">
+            <div class="row">
               <asp:Button
                 ID="btnSignup"
                 runat="server"
@@ -84,9 +89,7 @@ Inherits="welfareSystem.Signup" %>
         <!-- User List Card -->
         <div class="card shadow-lg border-0">
           <div class="card-header bg-gradient-success text-white py-3">
-            <h4 class="mb-0">
-              <i class="fas fa-users me-2"></i>User List
-            </h4>
+            <h4 class="mb-0"><i class="fas fa-users me-2"></i>User List</h4>
           </div>
           <div class="card-body p-4">
             <div class="table-responsive">
@@ -118,7 +121,10 @@ Inherits="welfareSystem.Signup" %>
 
                   <asp:BoundField DataField="Password" HeaderText="Password" />
 
-                  <%--<asp:BoundField DataField="RoleName" HeaderText="Role" />--%>
+                  <%--<asp:BoundField
+                    DataField="RoleName"
+                    HeaderText="Role"
+                  />--%>
                 </Columns>
               </asp:GridView>
             </div>
@@ -138,7 +144,8 @@ Inherits="welfareSystem.Signup" %>
     .card {
       border-radius: 12px;
     }
-    .form-control:focus, .form-select:focus {
+    .form-control:focus,
+    .form-select:focus {
       border-color: var(--security-color);
       box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
     }
@@ -158,17 +165,19 @@ Inherits="welfareSystem.Signup" %>
 
   <script>
     function togglePassword() {
-      var passwordTextBox = document.getElementById('<%= txtPassword.ClientID %>');
-      var eyeIcon = document.getElementById('eyeIcon');
+      var passwordTextBox = document.getElementById(
+        "<%= txtPassword.ClientID %>",
+      );
+      var eyeIcon = document.getElementById("eyeIcon");
 
-      if (passwordTextBox.type === 'password') {
-        passwordTextBox.type = 'text';
-        eyeIcon.classList.remove('fa-eye');
-        eyeIcon.classList.add('fa-eye-slash');
+      if (passwordTextBox.type === "password") {
+        passwordTextBox.type = "text";
+        eyeIcon.classList.remove("fa-eye");
+        eyeIcon.classList.add("fa-eye-slash");
       } else {
-        passwordTextBox.type = 'password';
-        eyeIcon.classList.remove('fa-eye-slash');
-        eyeIcon.classList.add('fa-eye');
+        passwordTextBox.type = "password";
+        eyeIcon.classList.remove("fa-eye-slash");
+        eyeIcon.classList.add("fa-eye");
       }
     }
   </script>

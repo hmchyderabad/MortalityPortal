@@ -75,6 +75,10 @@ namespace welfareSystem
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
+                // Debug: Show form count
+                System.Diagnostics.Debug.WriteLine("Forms loaded: " + dt.Rows.Count);
+                lblStatus.Text = "Loaded " + dt.Rows.Count + " forms from database";
+                
                 if (dt.Rows.Count > 0)
                 {
                     // Group by Category
@@ -107,14 +111,14 @@ namespace welfareSystem
                             <div class='accordion'>
                                 <div class='accordion-item'>
                                     <h2 class='accordion-header'>
-                                        <button class='accordion-button collapsed' 
+                                        <button class='accordion-button' 
                                             type='button' 
                                             data-bs-toggle='collapse' 
                                             data-bs-target='#{collapseId}'
-                                            aria-expanded='false'>
-                                            <i class='{GetCategoryIcon(category.CategoryName)}'></i>
-                                            <span>{category.CategoryName}</span>
-                                            <span class='badge-count'>{category.FormCount}</span>
+                                            aria-expanded='true'>
+                                            <i class='{GetCategoryIcon(category.CategoryName)} me-2'></i>
+                                            <span class='me-2'>{category.CategoryName}</span>
+                                            <span class='badge-count me-2'>{category.FormCount}</span>
                                         </button>
                                     </h2>
                                     <div id='{collapseId}' class='accordion-collapse collapse'>
@@ -131,19 +135,65 @@ namespace welfareSystem
                                                 </div>
                                                 <div class='form-check-group'>");
 
-                        // Forms
+                        // Forms with permissions
                         foreach (var form in category.Forms)
                         {
                             html.AppendLine($@"
-                                                    <div class='form-check'>
-                                                        <input type='checkbox' 
-                                                            class='form-check-input form-check-option' 
-                                                            id='chk_{form.FormId}'
-                                                            value='{form.FormId}' />
-                                                        <label class='form-check-label' for='chk_{form.FormId}'>
-                                                            <i class='{GetFormIcon(form.FormName)} me-1'></i>
+                                                    <div class='form-permissions-row' style='display: flex; justify-content: space-between; align-items: center; width: 100%;'>
+                                                        <div class='form-name-cell' style='flex: 0 0 auto;'>
+                                                            <i class='{GetFormIcon(form.FormName)}'></i>
                                                             {form.FormName}
-                                                        </label>
+                                                        </div>
+                                                        <div class='permissions-cell' style='flex: 1; display: flex; justify-content: flex-end;' >
+                                                            <div class='permission-row'>
+                                                                <input type='checkbox' 
+                                                                    name='perm_{form.FormId}_index'
+                                                                    id='perm_{form.FormId}_index'
+                                                                    data-formid='{form.FormId}' 
+                                                                    data-permission='CanIndex' />
+                                                                <label for='perm_{form.FormId}_index'>Index</label>
+                                                            </div>
+                                                            <div class='permission-row'>
+                                                                <input type='checkbox' 
+                                                                    name='perm_{form.FormId}_create'
+                                                                    id='perm_{form.FormId}_create'
+                                                                    data-formid='{form.FormId}' 
+                                                                    data-permission='CanCreate' />
+                                                                <label for='perm_{form.FormId}_create'>Create</label>
+                                                            </div>
+                                                            <div class='permission-row'>
+                                                                <input type='checkbox' 
+                                                                    name='perm_{form.FormId}_edit'
+                                                                    id='perm_{form.FormId}_edit'
+                                                                    data-formid='{form.FormId}' 
+                                                                    data-permission='CanEdit' />
+                                                                <label for='perm_{form.FormId}_edit'>Edit</label>
+                                                            </div>
+                                                            <div class='permission-row'>
+                                                                <input type='checkbox' 
+                                                                    name='perm_{form.FormId}_delete'
+                                                                    id='perm_{form.FormId}_delete'
+                                                                    data-formid='{form.FormId}' 
+                                                                    data-permission='CanDelete' />
+                                                                <label for='perm_{form.FormId}_delete'>Delete</label>
+                                                            </div>
+                                                            <div class='permission-row'>
+                                                                <input type='checkbox' 
+                                                                    name='perm_{form.FormId}_print'
+                                                                    id='perm_{form.FormId}_print'
+                                                                    data-formid='{form.FormId}' 
+                                                                    data-permission='CanPrint' />
+                                                                <label for='perm_{form.FormId}_print'>Print</label>
+                                                            </div>
+                                                            <div class='permission-row'>
+                                                                <input type='checkbox' 
+                                                                    name='perm_{form.FormId}_view'
+                                                                    id='perm_{form.FormId}_view'
+                                                                    data-formid='{form.FormId}' 
+                                                                    data-permission='CanView' />
+                                                                <label for='perm_{form.FormId}_view'>View</label>
+                                                            </div>
+                                                        </div>
                                                     </div>");
                         }
 
@@ -156,7 +206,8 @@ namespace welfareSystem
                                                 <div class='form-check'>
                                                     <input type='checkbox' 
                                                         class='form-check-input select-all-category' 
-                                                        id='selectAll_{categoryIndex}' />
+                                                        id='selectAll_{categoryIndex}' 
+                                                        onclick='toggleCategorySelectAll(this)' />
                                                     <label class='form-check-label' for='selectAll_{categoryIndex}'>
                                                         <i class='fa fa-check-double me-1'></i>Select All in this Category
                                                     </label>
@@ -175,6 +226,7 @@ namespace welfareSystem
                     litForms.Text = html.ToString();
                     formsArea.Visible = true;
                     noFormsMessage.Visible = false;
+                    lblStatus.Text = "Rendered " + categories.Count + " categories with " + dt.Rows.Count + " forms";
                 }
                 else
                 {
@@ -246,19 +298,17 @@ namespace welfareSystem
 
         private void LoadAssignedForms(string userId)
         {
+            System.Diagnostics.Debug.WriteLine("Loading assigned forms for userId: " + userId);
+            lblStatus.Text = "Loading permissions for user...";
+            
             if (userId == "0")
             {
-                string script = @"
-                    <script type='text/javascript'>
-                        document.querySelectorAll('.form-check-option').forEach(function(chk) {
-                            chk.checked = false;
-                        });
-                        document.querySelectorAll('.select-all-category').forEach(function(chk) {
+                string script = @"<script type='text/javascript'>
+                        document.querySelectorAll('.permission-switch .form-check-input').forEach(function(chk) {
                             chk.checked = false;
                         });
                         updateCount();
-                    </script>
-                ";
+                    </script>";
                 ClientScript.RegisterStartupScript(this.GetType(), "clearAll", script, false);
                 lblAssignedCount.Text = "0 forms assigned";
                 return;
@@ -266,55 +316,95 @@ namespace welfareSystem
 
             using (SqlConnection con = new SqlConnection(cs))
             {
-                string query = "SELECT FormId FROM UserForms WHERE UserId = @UserId";
+                string query = @"
+                    SELECT FormId, CanIndex, CanCreate, CanEdit, CanDelete, CanPrint, CanView 
+                    FROM UserFormPermissions
+                    WHERE UserId = @UserId
+                ";
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@UserId", userId);
 
                 con.Open();
                 SqlDataReader dr = cmd.ExecuteReader();
 
-                List<int> assignedFormIds = new List<int>();
+                var permissions = new Dictionary<int, Dictionary<string, bool>>();
                 while (dr.Read())
                 {
-                    assignedFormIds.Add(Convert.ToInt32(dr["FormId"]));
+                    int formId = Convert.ToInt32(dr["FormId"]);
+                    permissions[formId] = new Dictionary<string, bool>
+                    {
+                        { "CanIndex", dr["CanIndex"] != DBNull.Value && Convert.ToBoolean(dr["CanIndex"]) },
+                        { "CanCreate", dr["CanCreate"] != DBNull.Value && Convert.ToBoolean(dr["CanCreate"]) },
+                        { "CanEdit", dr["CanEdit"] != DBNull.Value && Convert.ToBoolean(dr["CanEdit"]) },
+                        { "CanDelete", dr["CanDelete"] != DBNull.Value && Convert.ToBoolean(dr["CanDelete"]) },
+                        { "CanPrint", dr["CanPrint"] != DBNull.Value && Convert.ToBoolean(dr["CanPrint"]) },
+                        { "CanView", dr["CanView"] != DBNull.Value && Convert.ToBoolean(dr["CanView"]) }
+                    };
+                    System.Diagnostics.Debug.WriteLine("Loaded permissions for FormId " + formId + ": Index=" + permissions[formId]["CanIndex"] + ", Create=" + permissions[formId]["CanCreate"]);
                 }
                 dr.Close();
+                
+                System.Diagnostics.Debug.WriteLine("Total permissions loaded: " + permissions.Count);
+                lblStatus.Text = "Loaded " + permissions.Count + " form permissions";
 
-                if (assignedFormIds.Count > 0)
+                if (permissions.Count > 0)
                 {
-                    string ids = string.Join(",", assignedFormIds);
-                    string script = $@"
-                        <script type='text/javascript'>
-                            var assignedIds = [{ids}];
-                            document.querySelectorAll('.form-check-option').forEach(function(chk) {{
-                                var id = parseInt(chk.value);
-                                if (assignedIds.indexOf(id) !== -1) {{
-                                    chk.checked = true;
-                                }}
-                            }});
-                            updateCount();
-                            
-                            document.querySelectorAll('.select-all-category').forEach(function(parent) {{
-                                var parentBody = parent.closest('.accordion-body');
-                                if (parentBody) {{
-                                    var allChecked = parentBody.querySelectorAll('.form-check-option:checked').length;
-                                    var total = parentBody.querySelectorAll('.form-check-option').length;
-                                    parent.checked = (allChecked === total && total > 0);
-                                }}
-                            }});
-                        </script>
-                    ";
-                    ClientScript.RegisterStartupScript(this.GetType(), "loadAssigned", script, false);
-                    lblAssignedCount.Text = assignedFormIds.Count + " forms assigned";
+                    System.Text.StringBuilder scriptBuilder = new System.Text.StringBuilder();
+                    scriptBuilder.AppendLine("<script type='text/javascript'>");
+                    scriptBuilder.AppendLine("    console.log('Starting to check permission boxes...');");
+                    
+                    foreach (var perm in permissions)
+                    {
+                        int formId = perm.Key;
+                        var perms = perm.Value;
+                        
+                        scriptBuilder.AppendLine($"    console.log('Processing FormId: {formId}');");
+                        scriptBuilder.AppendLine($"    var formId = {formId};");
+                        
+                        if (perms["CanIndex"])
+                        {
+                            scriptBuilder.AppendLine($"    var elemIndex = document.getElementById('perm_{formId}_index');");
+                            scriptBuilder.AppendLine($"    if(elemIndex) {{ elemIndex.checked = true; console.log('Checked Index for form {formId}'); }}");
+                        }
+                        if (perms["CanCreate"])
+                        {
+                            scriptBuilder.AppendLine($"    var elemCreate = document.getElementById('perm_{formId}_create');");
+                            scriptBuilder.AppendLine($"    if(elemCreate) {{ elemCreate.checked = true; console.log('Checked Create for form {formId}'); }}");
+                        }
+                        if (perms["CanEdit"])
+                        {
+                            scriptBuilder.AppendLine($"    var elemEdit = document.getElementById('perm_{formId}_edit');");
+                            scriptBuilder.AppendLine($"    if(elemEdit) {{ elemEdit.checked = true; console.log('Checked Edit for form {formId}'); }}");
+                        }
+                        if (perms["CanDelete"])
+                        {
+                            scriptBuilder.AppendLine($"    var elemDelete = document.getElementById('perm_{formId}_delete');");
+                            scriptBuilder.AppendLine($"    if(elemDelete) {{ elemDelete.checked = true; console.log('Checked Delete for form {formId}'); }}");
+                        }
+                        if (perms["CanPrint"])
+                        {
+                            scriptBuilder.AppendLine($"    var elemPrint = document.getElementById('perm_{formId}_print');");
+                            scriptBuilder.AppendLine($"    if(elemPrint) {{ elemPrint.checked = true; console.log('Checked Print for form {formId}'); }}");
+                        }
+                        if (perms["CanView"])
+                        {
+                            scriptBuilder.AppendLine($"    var elemView = document.getElementById('perm_{formId}_view');");
+                            scriptBuilder.AppendLine($"    if(elemView) {{ elemView.checked = true; console.log('Checked View for form {formId}'); }}");
+                        }
+                    }
+                    
+                    scriptBuilder.AppendLine("    updateCount();");
+                    scriptBuilder.AppendLine("    console.log('Finished checking permission boxes');");
+                    scriptBuilder.AppendLine("</script>");
+                    
+                    ClientScript.RegisterStartupScript(this.GetType(), "loadAssigned", scriptBuilder.ToString(), false);
+                    lblAssignedCount.Text = permissions.Count + " forms assigned";
                 }
                 else
                 {
                     string script = @"
                         <script type='text/javascript'>
-                            document.querySelectorAll('.form-check-option').forEach(function(chk) {
-                                chk.checked = false;
-                            });
-                            document.querySelectorAll('.select-all-category').forEach(function(chk) {
+                            document.querySelectorAll('.permission-switch .form-check-input').forEach(function(chk) {
                                 chk.checked = false;
                             });
                             updateCount();
@@ -328,7 +418,26 @@ namespace welfareSystem
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            if (ddlUsers.SelectedIndex == 0)
+            // Debug: Log dropdown state
+            System.Diagnostics.Debug.WriteLine("Save button clicked");
+            System.Diagnostics.Debug.WriteLine("ddlUsers.SelectedIndex: " + ddlUsers.SelectedIndex);
+            System.Diagnostics.Debug.WriteLine("ddlUsers.SelectedValue: " + ddlUsers.SelectedValue);
+            System.Diagnostics.Debug.WriteLine("ddlUsers.SelectedItem.Text: " + (ddlUsers.SelectedItem != null ? ddlUsers.SelectedItem.Text : "null"));
+            System.Diagnostics.Debug.WriteLine("Request.Form[ddlUsers]: " + Request.Form["ddlUsers"]);
+
+            // Get userId from Request.Form first (most reliable on postback), then fallback to dropdown
+            string selectedUserId = Request.Form["ddlUsers"];
+            if (string.IsNullOrEmpty(selectedUserId) || selectedUserId == "0")
+            {
+                selectedUserId = ddlUsers.SelectedValue;
+                System.Diagnostics.Debug.WriteLine("Using ddlUsers.SelectedValue: " + selectedUserId);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Using Request.Form value: " + selectedUserId);
+            }
+
+            if (string.IsNullOrEmpty(selectedUserId) || selectedUserId == "0")
             {
                 ScriptManager.RegisterStartupScript(
                     this,
@@ -342,28 +451,40 @@ namespace welfareSystem
 
             try
             {
-                List<int> selectedFormIds = GetSelectedFormIds();
-                int userId = Convert.ToInt32(ddlUsers.SelectedValue);
+                var selectedPermissions = GetSelectedPermissions();
+                int userId = Convert.ToInt32(selectedUserId);
+                System.Diagnostics.Debug.WriteLine("Saving permissions for userId: " + userId);
 
                 using (SqlConnection con = new SqlConnection(cs))
                 {
                     con.Open();
 
-                    string delQuery = "DELETE FROM UserForms WHERE UserId = @UserId";
-                    SqlCommand cmdDel = new SqlCommand(delQuery, con);
-                    cmdDel.Parameters.AddWithValue("@UserId", userId);
-                    cmdDel.ExecuteNonQuery();
+                    // Delete existing UserFormPermissions for this user
+                    string delPermissionsQuery = "DELETE FROM UserFormPermissions WHERE UserId = @UserId";
+                    SqlCommand cmdDelPermissions = new SqlCommand(delPermissionsQuery, con);
+                    cmdDelPermissions.Parameters.AddWithValue("@UserId", userId);
+                    cmdDelPermissions.ExecuteNonQuery();
 
-                    if (selectedFormIds.Count > 0)
+                    if (selectedPermissions.Count > 0)
                     {
-                        string insertQuery = "INSERT INTO UserForms (UserId, FormId) VALUES (@UserId, @FormId)";
+                        // Insert directly into UserFormPermissions table using FormId
+                        string insertPermissionsQuery = @"
+                            INSERT INTO UserFormPermissions (UserId, FormId, CanIndex, CanCreate, CanEdit, CanDelete, CanPrint, CanView) 
+                            VALUES (@UserId, @FormId, @CanIndex, @CanCreate, @CanEdit, @CanDelete, @CanPrint, @CanView)
+                        ";
 
-                        foreach (int formId in selectedFormIds)
+                        foreach (var perm in selectedPermissions)
                         {
-                            SqlCommand cmd = new SqlCommand(insertQuery, con);
-                            cmd.Parameters.AddWithValue("@UserId", userId);
-                            cmd.Parameters.AddWithValue("@FormId", formId);
-                            cmd.ExecuteNonQuery();
+                            SqlCommand cmdPermissions = new SqlCommand(insertPermissionsQuery, con);
+                            cmdPermissions.Parameters.AddWithValue("@UserId", userId);
+                            cmdPermissions.Parameters.AddWithValue("@FormId", perm.Key);
+                            cmdPermissions.Parameters.AddWithValue("@CanIndex", perm.Value["CanIndex"]);
+                            cmdPermissions.Parameters.AddWithValue("@CanCreate", perm.Value["CanCreate"]);
+                            cmdPermissions.Parameters.AddWithValue("@CanEdit", perm.Value["CanEdit"]);
+                            cmdPermissions.Parameters.AddWithValue("@CanDelete", perm.Value["CanDelete"]);
+                            cmdPermissions.Parameters.AddWithValue("@CanPrint", perm.Value["CanPrint"]);
+                            cmdPermissions.Parameters.AddWithValue("@CanView", perm.Value["CanView"]);
+                            cmdPermissions.ExecuteNonQuery();
                         }
                     }
 
@@ -374,11 +495,11 @@ namespace welfareSystem
                     this,
                     GetType(),
                     "msg",
-                    "alert('Forms assigned successfully to " + ddlUsers.SelectedItem.Text + "!');",
+                    "alert('Forms and permissions assigned successfully to " + ddlUsers.SelectedItem.Text + "!');",
                     true
                 );
 
-                lblAssignedCount.Text = selectedFormIds.Count + " forms assigned";
+                lblAssignedCount.Text = selectedPermissions.Count + " forms assigned";
                 lblStatus.Text = "✅ Saved at " + DateTime.Now.ToString("hh:mm tt");
 
                 LoadAssignedForms(ddlUsers.SelectedValue);
@@ -395,28 +516,51 @@ namespace welfareSystem
             }
         }
 
-        private List<int> GetSelectedFormIds()
+        private Dictionary<int, Dictionary<string, bool>> GetSelectedPermissions()
         {
-            List<int> selectedIds = new List<int>();
+            var permissions = new Dictionary<int, Dictionary<string, bool>>();
 
-            // Get values from Request.Form
+            // Get all form IDs that have at least one permission checked
+            var formIds = new HashSet<int>();
+
             foreach (string key in Request.Form.AllKeys)
             {
-                if (key.StartsWith("chk_"))
+                if (key != null && key.StartsWith("perm_") && Request.Form[key] == "on")
                 {
-                    string value = Request.Form[key];
-                    if (!string.IsNullOrEmpty(value))
+                    // Parse key format: perm_{formId}_{permission}
+                    string[] parts = key.Split('_');
+                    if (parts.Length >= 3)
                     {
                         int formId;
-                        if (int.TryParse(value, out formId))
+                        if (int.TryParse(parts[1], out formId))
                         {
-                            selectedIds.Add(formId);
+                            formIds.Add(formId);
                         }
                     }
                 }
             }
 
-            return selectedIds;
+            // For each form ID, collect all permissions
+            foreach (int formId in formIds)
+            {
+                var formPermissions = new Dictionary<string, bool>
+                {
+                    { "CanIndex", Request.Form["perm_" + formId + "_index"] == "on" },
+                    { "CanCreate", Request.Form["perm_" + formId + "_create"] == "on" },
+                    { "CanEdit", Request.Form["perm_" + formId + "_edit"] == "on" },
+                    { "CanDelete", Request.Form["perm_" + formId + "_delete"] == "on" },
+                    { "CanPrint", Request.Form["perm_" + formId + "_print"] == "on" },
+                    { "CanView", Request.Form["perm_" + formId + "_view"] == "on" }
+                };
+
+                // Only add if at least one permission is true
+                if (formPermissions.Values.Any(v => v))
+                {
+                    permissions[formId] = formPermissions;
+                }
+            }
+
+            return permissions;
         }
     }
 }
