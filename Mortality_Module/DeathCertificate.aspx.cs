@@ -204,6 +204,20 @@ namespace welfareSystem.Mortality_Module
 
                 con.Open();
                 cmd.ExecuteNonQuery();
+
+                // Insert into MortalityTracking table
+                string trackingQuery = @"INSERT INTO MortalityTracking 
+                                        (DeathCertificateNo, MRNo, AdmNo, PatientName, ReviewFormNo, IsDeathCertificateCreated, IsReviewFormCreated, CreatedAt)
+                                        VALUES 
+                                        (@DeathCertNo, @MRNo, @AdmNo, @PatientName, NULL, 1, 0, GETDATE())";
+
+                SqlCommand trackingCmd = new SqlCommand(trackingQuery, con);
+                trackingCmd.Parameters.AddWithValue("@DeathCertNo", certificateNo);
+                trackingCmd.Parameters.AddWithValue("@MRNo", lblMRNo.Text);
+                trackingCmd.Parameters.AddWithValue("@AdmNo", lblAdmNo.Text);
+                trackingCmd.Parameters.AddWithValue("@PatientName", lblPatientName.Text);
+                trackingCmd.ExecuteNonQuery();
+
                 con.Close();
 
                 ScriptManager.RegisterStartupScript(this, GetType(), "success", "Swal.fire('Success','Death Certificate saved successfully!','success');", true);

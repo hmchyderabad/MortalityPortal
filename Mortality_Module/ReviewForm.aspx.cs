@@ -114,6 +114,9 @@ namespace welfareSystem.Mortality_Module
         {
             // Save review form data
             string certificateID = Request.QueryString["CertificateID"];
+            
+            // Reload certificate data to ensure CertificateNo is available
+            LoadCertificateData();
 
             using (SqlConnection con = new SqlConnection(mortalityConnection))
             {
@@ -143,8 +146,9 @@ namespace welfareSystem.Mortality_Module
                             @HAIReported, @HAIReportedRemark, GETDATE(), @CreatedBy, @ReviewFormID)";
 
 
+                string reviewFormNo = GenerateReviewFormNumber();
                 SqlCommand cmd = new SqlCommand(query, con);
-                cmd.Parameters.AddWithValue("@ReviewFormID", GenerateReviewFormNumber());
+                cmd.Parameters.AddWithValue("@ReviewFormID", reviewFormNo);
                 cmd.Parameters.AddWithValue("@DateTimeShifted", string.IsNullOrEmpty(txtDateShifted.Text) ? (object)DBNull.Value : DateTime.Parse(txtDateShifted.Text));
                 cmd.Parameters.AddWithValue("@ShiftedIntoCriticalWard", ddlShiftedIntoCriticalWard.SelectedValue);
                 cmd.Parameters.AddWithValue("@CoMorbidities", txtCoMorbidities.Text);
@@ -199,6 +203,16 @@ namespace welfareSystem.Mortality_Module
 
                 con.Open();
                 cmd.ExecuteNonQuery();
+                // Insert into MortalityTracking table
+                string trackingQuery = @"Update MortalityTracking 
+                                        Set ReviewFormNo = @ReviewFormNo, IsReviewFormCreated = 1
+                                        Where DeathCertificateNo = @DeathCertNo AND IsReviewFormCreated = 0 AND IsDeathCertificateCreated = 1;";
+
+                SqlCommand trackingCmd = new SqlCommand(trackingQuery, con);
+                trackingCmd.Parameters.AddWithValue("@DeathCertNo", CertificateNo);
+                trackingCmd.Parameters.AddWithValue("@ReviewFormNo", reviewFormNo);
+
+                trackingCmd.ExecuteNonQuery();
                 con.Close();
                 ScriptManager.RegisterStartupScript(this, GetType(), "success", "Swal.fire('Success','Review form saved successfully!','success');", true);
                 Response.Redirect("ReviewFormList.aspx");

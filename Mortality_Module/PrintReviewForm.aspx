@@ -317,8 +317,8 @@ Inherits="welfareSystem.Mortality_Module.PrintReviewForm" %>
           <tr>
             <td class="label-col">Shifted Critical Ward:</td>
             <td class="value-col">
-              <asp:Label ID="lblDateShiftedCritical" runat="server"></asp:Label>
               <asp:Label ID="lblShiftedIntoCriticalWard" runat="server"></asp:Label>
+              <asp:Label ID="lblDateShiftedCritical" runat="server"></asp:Label>
             </td>
             <td class="label-col" style="padding-left: 15px;">Date & Time of Death:</td>
             <td class="value-col">

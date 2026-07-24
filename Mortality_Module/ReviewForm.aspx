@@ -234,7 +234,7 @@
                 <th style="width: 10%;">Y</th>
                 <th style="width: 10%;">N</th>
                 <th style="width: 10%;">N/A</th>
-                <th style="width: 10%; text-align: left;">Remark</th>
+                <th style="width: 10%; text-align: left;">Comments</th>
               </tr>
             </thead>
             <tbody>

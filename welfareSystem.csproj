@@ -101,6 +101,7 @@
     <Content Include="Mortality_Module\PrintReviewForm.aspx" />
     <Content Include="Mortality_Module\ReviewForm.aspx" />
     <Content Include="Mortality_Module\ReviewFormList.aspx" />
+    <Content Include="Mortality_Module\ReviewList.aspx" />
     <Content Include="Mortality_Module\View.aspx" />
     <Content Include="PatientInfo.aspx" />
     <Content Include="PatientRegistration.aspx" />
@@ -336,6 +337,13 @@
     </Compile>
     <Compile Include="Mortality_Module\ReviewFormList.aspx.designer.cs">
       <DependentUpon>ReviewFormList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Mortality_Module\ReviewList.aspx.cs">
+      <DependentUpon>ReviewList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Mortality_Module\ReviewList.aspx.designer.cs">
+      <DependentUpon>ReviewList.aspx</DependentUpon>
     </Compile>
     <Compile Include="Mortality_Module\View.aspx.cs">
       <DependentUpon>View.aspx</DependentUpon>
